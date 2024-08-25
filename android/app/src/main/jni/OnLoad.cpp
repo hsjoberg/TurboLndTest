@@ -34,7 +34,7 @@
 #include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
 #include <rncore.h>
 //
-#include <NativeSampleModule.h>
+#include <NativeSampleModuleCxx.h>
 
 #ifdef REACT_NATIVE_APP_CODEGEN_HEADER
 #include REACT_NATIVE_APP_CODEGEN_HEADER
@@ -72,8 +72,8 @@ std::shared_ptr<TurboModule> cxxModuleProvider(
   // if (name == NativeCxxModuleExample::kModuleName) {
   //   return std::make_shared<NativeCxxModuleExample>(jsInvoker);
   // }
-  if (name == "NativeSampleModule") {
-    return std::make_shared<facebook::react::NativeSampleModule>(jsInvoker);
+  if (name == "NativeSampleModuleCxx") {
+    return std::make_shared<facebook::react::NativeSampleModuleCxx>(jsInvoker);
   }
 
   // And we fallback to the CXX module providers autolinked

@@ -28,7 +28,7 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import NativeSampleModule from './tm/NativeSampleModule';
+import NativeSampleModuleCxx from './tm/NativeSampleModuleCxx';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -84,7 +84,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={() => {
                 console.log(
-                  NativeSampleModule.start("", (t) => console.log(t)),
+                  NativeSampleModuleCxx.start("", (t) => console.log(t)),
                 );
             }}
             title="start lnd"
@@ -92,7 +92,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.startPromise(""),
+                  await NativeSampleModuleCxx.startPromise(""),
                 );
             }}
             title="startPromise"
@@ -100,7 +100,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.startPromise2(),
+                  await NativeSampleModuleCxx.startPromise2(),
                 );
             }}
             title="startPromise2"
@@ -108,7 +108,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.startPromise3(),
+                  await NativeSampleModuleCxx.startPromise3(),
                 );
             }}
             title="startPromise3"
@@ -116,7 +116,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.startPromise4(),
+                  await NativeSampleModuleCxx.startPromise4(),
                 );
             }}
             title="startPromise4"
@@ -124,7 +124,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.startPromise5(),
+                  await NativeSampleModuleCxx.startPromise5(),
                 );
             }}
             title="startPromise5"
@@ -132,7 +132,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.startPromise6(),
+                  await NativeSampleModuleCxx.startPromise6(),
                 );
             }}
             title="startPromise6"
@@ -140,7 +140,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.startPromise7(),
+                  await NativeSampleModuleCxx.startPromise7(),
                 );
             }}
             title="startPromise7"
@@ -148,7 +148,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.callback(() => console.log("callback from callback")),
+                  await NativeSampleModuleCxx.callback(() => console.log("callback from callback")),
                 );
             }}
             title="callback"
@@ -157,7 +157,7 @@ function App(): React.JSX.Element {
             onPress={() => {
                 for (let i = 0; i < 100; i++) {
                   console.log(
-                    NativeSampleModule.callback(() => console.log("callback from callback")),
+                    NativeSampleModuleCxx.callback(() => console.log("callback from callback")),
                   );
                 }
             }}
@@ -166,7 +166,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.promise(),
+                  await NativeSampleModuleCxx.promise(),
                 );
             }}
             title="promise"
@@ -175,7 +175,7 @@ function App(): React.JSX.Element {
             onPress={async () => {
               for (let i = 0; i < 100; i++) {
                 console.log(
-                  await NativeSampleModule.promise(),
+                  await NativeSampleModuleCxx.promise(),
                 );
               }
             }}
@@ -184,7 +184,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  NativeSampleModule.startPromiseCallback((a) => console.log("callback from startPromiseCallback")),
+                  NativeSampleModuleCxx.startPromiseCallback((a) => console.log("callback from startPromiseCallback")),
                 );
             }}
             title="startPromiseCallback"
@@ -192,7 +192,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  NativeSampleModule.startPromiseCallback2((a) => console.log("callback from startPromiseCallback2")),
+                  NativeSampleModuleCxx.startPromiseCallback2((a) => console.log("callback from startPromiseCallback2")),
                 );
             }}
             title="startPromiseCallback2"
@@ -200,23 +200,26 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  NativeSampleModule.startPromiseCallback3((a) => console.log("callback from startPromiseCallback3")),
+                  NativeSampleModuleCxx.startPromiseCallback3((a) => console.log("callback from startPromiseCallback3")),
                 );
             }}
             title="startPromiseCallback3"
           />
           <Button
             onPress={async () => {
-                console.log(
-                  NativeSampleModule.getInfoCallback((a) => console.log("callback from getInfoCallback", a)),
-                );
+                const unsubscribe = NativeSampleModuleCxx.getInfoCallback((a) => console.log("callback from getInfoCallback", a), (err) => console.log("error from getInfoCallback", err));
+
+                setTimeout(() => {
+                  console.log("unsubscribe");
+                  unsubscribe();
+                }, 3000);
             }}
             title="getInfoCallback"
           />
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.getInfo(),
+                  await NativeSampleModuleCxx.getInfo(),
                 );
             }}
             title="getInfo"
@@ -224,7 +227,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.getInfo4(),
+                  await NativeSampleModuleCxx.getInfo4(),
                 );
             }}
             title="getInfo4"
@@ -234,7 +237,7 @@ function App(): React.JSX.Element {
               const startTime = performance.now();
               for (let i = 0; i < 100; i++) {
                 // console.log(
-                  await NativeSampleModule.getInfo4()
+                  await NativeSampleModuleCxx.getInfo4()
                 // );
               }
               const endTime = performance.now();
@@ -251,7 +254,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.getInfo2(),
+                  await NativeSampleModuleCxx.getInfo2(),
                 );
             }}
             title="getInfo2"
@@ -259,7 +262,7 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.getInfo3(),
+                  await NativeSampleModuleCxx.getInfo3(),
                 );
             }}
             title="getInfo3"
@@ -268,14 +271,14 @@ function App(): React.JSX.Element {
             onPress={async () => {
               const promised = async () => {
                 return new Promise((resolve, reject) => {
-                  NativeSampleModule.getInfoCallback((a) => resolve(a));
+                  NativeSampleModuleCxx.getInfoCallback((a) => resolve(a));
                 });
               }
 
               const startTime = performance.now();
               for (let i = 0; i < 100; i++) {
                 // console.log(
-                  // NativeSampleModule.getInfoCallback((a) => console.log("callback from getInfoCallback", a));
+                  // NativeSampleModuleCxx.getInfoCallback((a) => console.log("callback from getInfoCallback", a));
                   await promised();
                 // );
               }
@@ -295,7 +298,7 @@ function App(): React.JSX.Element {
               const startTime = performance.now();
               for (let i = 0; i < 100; i++) {
                 // console.log(
-                  await NativeSampleModule.getInfo()
+                  await NativeSampleModuleCxx.getInfo()
                 // );
               }
               const endTime = performance.now();
@@ -314,7 +317,7 @@ function App(): React.JSX.Element {
               const startTime = performance.now();
               for (let i = 0; i < 100; i++) {
                 // console.log(
-                  await NativeSampleModule.getInfo2()
+                  await NativeSampleModuleCxx.getInfo2()
                 // );
               }
               const endTime = performance.now();
@@ -333,7 +336,7 @@ function App(): React.JSX.Element {
               const startTime = performance.now();
               for (let i = 0; i < 100; i++) {
                 // console.log(
-                  await NativeSampleModule.getInfo3()
+                  await NativeSampleModuleCxx.getInfo3()
                 // );
               }
               const endTime = performance.now();
@@ -350,14 +353,14 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 console.log(
-                  await NativeSampleModule.reg(),
+                  await NativeSampleModuleCxx.reg(),
                 );
             }}
             title="reg"
           />
           <Button
             onPress={async () => {
-                  // const f = NativeSampleModule.reg();
+                  // const f = NativeSampleModuleCxx.reg();
                   console.log("foo",global.foo);
                   console.log(global.foo(() => console.log("callback foo")));
             }}
@@ -366,17 +369,35 @@ function App(): React.JSX.Element {
 
           <Button
             onPress={async () => {
-                  // const f = NativeSampleModule.reg();
-                  console.log(await NativeSampleModule.prom());
+                  // const f = NativeSampleModuleCxx.reg();
+                  console.log(await NativeSampleModuleCxx.prom());
             }}
             title="prom"
           />
           <Button
             onPress={async () => {
-                  // const f = NativeSampleModule.reg();
-                  console.log(await NativeSampleModule.a());
+                  // const f = NativeSampleModuleCxx.reg();
+                  console.log(NativeSampleModuleCxx.subscribeState((a) => console.log("callback from subscribeState", a), (err) => console.log("error from subscribeState", err)));
             }}
-            title="a"
+            title="subscribeState"
+          />
+
+
+          <Button
+            onPress={async () => {
+                const channelAcceptor = NativeSampleModuleCxx.channelAcceptor(
+                  (a) => {
+                    console.log("callback from channelAcceptor", a);
+                  },
+                  (err) => {
+                    console.log("error from channelAcceptor", err)
+                  });
+
+                  console.log("channelAcceptor", channelAcceptor);
+
+                  channelAcceptor.send("aGVq");
+            }}
+            title="channelAcceptor"
           />
           <Section title="Step One">
             Edit <Text style={styles.highlight}>App.tsx</Text> to change this
