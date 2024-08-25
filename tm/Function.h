@@ -13,7 +13,7 @@
 #include <ReactCommon/CallInvoker.h>
 #include <ReactCommon/SchedulerPriority.h>
 
-#include <android/log.h>
+#include "log.h"
 
 namespace facebook::react {
 
@@ -31,7 +31,7 @@ class AsyncCallback2 {
             runtime,
             std::move(function),
             std::move(jsInvoker))) {
-              __android_log_write(ANDROID_LOG_ERROR, "turbolndandroid", "AsyncCallback2 constructor");
+              TURBOLND_LOG_DEBUG("AsyncCallback2 constructor");
             }
 
   void operator()(Args... args) const noexcept {
@@ -120,7 +120,7 @@ class SyncCallback2<R(Args...)> {
             std::move(function),
             rt,
             std::move(jsInvoker))) {
-              __android_log_write(ANDROID_LOG_ERROR, "turbolndandroid", "SyncCallback2 constructor");
+              TURBOLND_LOG_DEBUG("SyncCallback2 constructor");
             }
 
   // Disallow copying, as we can no longer safely destroy the callback
@@ -138,11 +138,11 @@ class SyncCallback2<R(Args...)> {
   }
 
   ~SyncCallback2() {
-    __android_log_write(ANDROID_LOG_ERROR, "turbolndandroid", "SyncCallback2 destructor");
+    TURBOLND_LOG_DEBUG("SyncCallback2 destructor");
     if (auto wrapper = wrapper_.lock()) {
-      __android_log_write(ANDROID_LOG_ERROR, "turbolndandroid", "Destroying wrapper");
+      TURBOLND_LOG_DEBUG("Destroying wrapper");
       wrapper->destroy();
-      __android_log_write(ANDROID_LOG_ERROR, "turbolndandroid", "Destroyed wrapper");
+      TURBOLND_LOG_DEBUG("Destroyed wrapper");
     }
   }
 

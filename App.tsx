@@ -11,6 +11,7 @@ import type {PropsWithChildren} from 'react';
 import {
   Alert,
   Button,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -28,7 +29,13 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import RNFS from 'react-native-fs';
+import { lnrpc } from './proto/lightning';
+import * as base64 from "base64-js";
+
 import NativeSampleModuleCxx from './tm/NativeSampleModuleCxx';
+
+console.log("RNFS.DocumentDirectoryPath", RNFS.DocumentDirectoryPath);
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -82,163 +89,43 @@ function App(): React.JSX.Element {
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
           <Button
-            onPress={() => {
+            onPress={async () => {
                 console.log(
-                  NativeSampleModuleCxx.start("", (t) => console.log(t)),
+                  await NativeSampleModuleCxx.start(`
+--lnddir=${Platform.OS === "ios" ? RNFS.DocumentDirectoryPath : "/data/user/0/com.turbolnd/files"}
+--noseedbackup
+--nolisten
+--bitcoin.active
+--bitcoin.regtest
+--bitcoin.node=neutrino
+--feeurl=\"https://nodes.lightning.computer/fees/v1/btc-fee-estimates.json\"
+--routing.assumechanvalid
+--tlsdisableautofill
+--db.bolt.auto-compact
+--db.bolt.auto-compact-min-age=0
+--neutrino.connect=192.168.10.120:19444`)
                 );
             }}
-            title="start lnd"
+            title="start"
           />
           <Button
             onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.startPromise(""),
-                );
-            }}
-            title="startPromise"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.startPromise2(),
-                );
-            }}
-            title="startPromise2"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.startPromise3(),
-                );
-            }}
-            title="startPromise3"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.startPromise4(),
-                );
-            }}
-            title="startPromise4"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.startPromise5(),
-                );
-            }}
-            title="startPromise5"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.startPromise6(),
-                );
-            }}
-            title="startPromise6"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.startPromise7(),
-                );
-            }}
-            title="startPromise7"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.callback(() => console.log("callback from callback")),
-                );
-            }}
-            title="callback"
-          />
-          <Button
-            onPress={() => {
-                for (let i = 0; i < 100; i++) {
-                  console.log(
-                    NativeSampleModuleCxx.callback(() => console.log("callback from callback")),
-                  );
-                }
-            }}
-            title="callback loop"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.promise(),
-                );
-            }}
-            title="promise"
-          />
-          <Button
-            onPress={async () => {
-              for (let i = 0; i < 100; i++) {
-                console.log(
-                  await NativeSampleModuleCxx.promise(),
-                );
-              }
-            }}
-            title="promise loop"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  NativeSampleModuleCxx.startPromiseCallback((a) => console.log("callback from startPromiseCallback")),
-                );
-            }}
-            title="startPromiseCallback"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  NativeSampleModuleCxx.startPromiseCallback2((a) => console.log("callback from startPromiseCallback2")),
-                );
-            }}
-            title="startPromiseCallback2"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  NativeSampleModuleCxx.startPromiseCallback3((a) => console.log("callback from startPromiseCallback3")),
-                );
-            }}
-            title="startPromiseCallback3"
-          />
-          <Button
-            onPress={async () => {
-                const unsubscribe = NativeSampleModuleCxx.getInfoCallback((a) => console.log("callback from getInfoCallback", a), (err) => console.log("error from getInfoCallback", err));
-
-                setTimeout(() => {
-                  console.log("unsubscribe");
-                  unsubscribe();
-                }, 3000);
-            }}
-            title="getInfoCallback"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.getInfo(),
-                );
+                const b64 = await NativeSampleModuleCxx.getInfo("")
+                console.log("base64", b64);
+                const getInfoResponse = lnrpc.GetInfoResponse.decode(base64.toByteArray(b64));
+                console.log("getInfoResponse", getInfoResponse.toJSON());
             }}
             title="getInfo"
           />
           <Button
             onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.getInfo4(),
-                );
-            }}
-            title="getInfo4"
-          />
-          <Button
-            onPress={async () => {
               const startTime = performance.now();
               for (let i = 0; i < 100; i++) {
-                // console.log(
-                  await NativeSampleModuleCxx.getInfo4()
-                // );
+                const getInfoRequest = lnrpc.GetInfoRequest.encode({}).finish();
+                const getInfoRequestBase64 = base64.fromByteArray(getInfoRequest);
+
+                const b64 = await NativeSampleModuleCxx.getInfo(getInfoRequestBase64)
+                const getInfoResponse = lnrpc.GetInfoResponse.decode(base64.toByteArray(b64));
               }
               const endTime = performance.now();
               const executionTime = endTime - startTime;
@@ -249,57 +136,13 @@ function App(): React.JSX.Element {
                 Alert.alert(`Execution time: ${executionTime} milliseconds`);
               }
             }}
-            title="getInfo4 loop"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.getInfo2(),
-                );
-            }}
-            title="getInfo2"
-          />
-          <Button
-            onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.getInfo3(),
-                );
-            }}
-            title="getInfo3"
-          />
-          <Button
-            onPress={async () => {
-              const promised = async () => {
-                return new Promise((resolve, reject) => {
-                  NativeSampleModuleCxx.getInfoCallback((a) => resolve(a));
-                });
-              }
-
-              const startTime = performance.now();
-              for (let i = 0; i < 100; i++) {
-                // console.log(
-                  // NativeSampleModuleCxx.getInfoCallback((a) => console.log("callback from getInfoCallback", a));
-                  await promised();
-                // );
-              }
-              const endTime = performance.now();
-              const executionTime = endTime - startTime;
-
-              console.log("done");
-              console.log(`Execution time: ${executionTime} milliseconds`)
-              if (!__DEV__) {
-                Alert.alert(`Execution time: ${executionTime} milliseconds`);
-              }
-            }}
-            title="getInfoCallback loop"
+            title="getInfo loop \w protobuf encoding/decoding"
           />
           <Button
             onPress={async () => {
               const startTime = performance.now();
               for (let i = 0; i < 100; i++) {
-                // console.log(
-                  await NativeSampleModuleCxx.getInfo()
-                // );
+                  await NativeSampleModuleCxx.getInfo("")
               }
               const endTime = performance.now();
               const executionTime = endTime - startTime;
@@ -314,88 +157,85 @@ function App(): React.JSX.Element {
           />
           <Button
             onPress={async () => {
-              const startTime = performance.now();
-              for (let i = 0; i < 100; i++) {
-                // console.log(
-                  await NativeSampleModuleCxx.getInfo2()
-                // );
-              }
-              const endTime = performance.now();
-              const executionTime = endTime - startTime;
+                const b64 = await NativeSampleModuleCxx.listPeers("")
+                console.log("base64", b64);
+                const listPeersResponse = lnrpc.ListPeersResponse.decode(base64.toByteArray(b64));
+                console.log("listPeersResponse", listPeersResponse.peers);
 
-              console.log("done");
-              console.log(`Execution time: ${executionTime} milliseconds`)
-              if (!__DEV__) {
-                Alert.alert(`Execution time: ${executionTime} milliseconds`);
-              }
             }}
-            title="getInfo2 loop"
+            title="listPeers"
           />
           <Button
             onPress={async () => {
-              const startTime = performance.now();
-              for (let i = 0; i < 100; i++) {
-                // console.log(
-                  await NativeSampleModuleCxx.getInfo3()
-                // );
-              }
-              const endTime = performance.now();
-              const executionTime = endTime - startTime;
+                const connectPeerRequest = lnrpc.ConnectPeerRequest.encode({
+                  addr: {
+                    host: "192.168.10.120:9735",
+                    pubkey: "033762daab2eddcb5d04101fb1dac955ffc23251d0b2664419fa07805b6fc8ee5d",
+                  },
+                  perm: true,
+                }).finish();
+                const connectPeerRequestBase64 = base64.fromByteArray(connectPeerRequest);
+                console.log("Sending request", connectPeerRequest, connectPeerRequestBase64);
 
-              console.log("done");
-              console.log(`Execution time: ${executionTime} milliseconds`)
-              if (!__DEV__) {
-                Alert.alert(`Execution time: ${executionTime} milliseconds`);
-              }
+                const b64 = await NativeSampleModuleCxx.connectPeer(connectPeerRequestBase64)
+                console.log("base64", b64);
+                const listPeersResponse = lnrpc.ListPeersResponse.decode(base64.toByteArray(b64));
+                console.log("listPeersResponse", listPeersResponse);
+
             }}
-            title="getInfo3 loop"
+            title="connectPeer"
           />
           <Button
             onPress={async () => {
-                console.log(
-                  await NativeSampleModuleCxx.reg(),
+                const b64 = await NativeSampleModuleCxx.listChannels("")
+                console.log("base64", b64);
+                const listChannelsResponse = lnrpc.ListChannelsResponse.decode(base64.toByteArray(b64));
+                console.log("listChannelsResponse", listChannelsResponse.toJSON());
+
+            }}
+            title="listChannels"
+          />
+          <Button
+            onPress={async () => {
+                const unsubscribe = NativeSampleModuleCxx.subscribeState(
+                  (a) => {
+                    console.log("callback from subscribeState", a);
+                    const state = lnrpc.SubscribeStateResponse.decode(base64.toByteArray(a));
+                    console.log("state", state);
+                  },
+                  (err) => {
+                    console.log("error from subscribeState", err);
+                  }
                 );
-            }}
-            title="reg"
-          />
-          <Button
-            onPress={async () => {
-                  // const f = NativeSampleModuleCxx.reg();
-                  console.log("foo",global.foo);
-                  console.log(global.foo(() => console.log("callback foo")));
-            }}
-            title="foo"
-          />
 
-          <Button
-            onPress={async () => {
-                  // const f = NativeSampleModuleCxx.reg();
-                  console.log(await NativeSampleModuleCxx.prom());
-            }}
-            title="prom"
-          />
-          <Button
-            onPress={async () => {
-                  // const f = NativeSampleModuleCxx.reg();
-                  console.log(NativeSampleModuleCxx.subscribeState((a) => console.log("callback from subscribeState", a), (err) => console.log("error from subscribeState", err)));
+                // setTimeout(() => {
+                //   console.log("unsubscribe");
+                //   unsubscribe();
+                // }, 3000);
             }}
             title="subscribeState"
           />
-
-
           <Button
             onPress={async () => {
-                const channelAcceptor = NativeSampleModuleCxx.channelAcceptor(
-                  (a) => {
-                    console.log("callback from channelAcceptor", a);
+                const chanAcceptor = NativeSampleModuleCxx.channelAcceptor(
+                  (dataBase64) => {
+                    console.log("callback from channelAcceptor", dataBase64);
+                    const channelAcceptorRequest = lnrpc.ChannelAcceptRequest.decode(base64.toByteArray(dataBase64));
+                    console.log("channelAcceptorRequest", channelAcceptorRequest);
+
+                    const channelAcceptorResponse = lnrpc.ChannelAcceptResponse.encode({
+                      accept: true,
+                      pendingChanId: channelAcceptorRequest.pendingChanId,
+                    }).finish();
+                    const channelAcceptorResponseBase64 = base64.fromByteArray(channelAcceptorResponse);
+
+                    console.log("Sending response", channelAcceptorResponse, channelAcceptorResponseBase64);
+                    chanAcceptor.send(channelAcceptorResponseBase64);
                   },
                   (err) => {
-                    console.log("error from channelAcceptor", err)
-                  });
-
-                  console.log("channelAcceptor", channelAcceptor);
-
-                  channelAcceptor.send("aGVq");
+                    console.log("error from channelAcceptor", err);
+                  }
+                );
             }}
             title="channelAcceptor"
           />

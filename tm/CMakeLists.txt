@@ -34,19 +34,10 @@ target_link_libraries(tm
 add_library(lib_foo SHARED IMPORTED)
 set_property(TARGET lib_foo PROPERTY IMPORTED_NO_SONAME 1)
 set_target_properties(lib_foo PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../jniLibs/${CMAKE_ANDROID_ARCH_ABI}/liblnd.so)
-target_include_directories(tm PUBLIC
-  "${CMAKE_SOURCE_DIR}/../../../../../lnd"
-)
+# target_include_directories(tm PUBLIC
+#   "${CMAKE_SOURCE_DIR}/../../../../../lnd"
+# )
 # include_directories(${CMAKE_SOURCE_DIR}/../../../../lnd/)
 
 
 target_link_libraries(${CMAKE_PROJECT_NAME} lib_foo)
-
-
-
-
-add_library(lib_bar SHARED IMPORTED)
-set_property(TARGET lib_bar PROPERTY IMPORTED_NO_SONAME 1)
-set_target_properties(lib_bar PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../jniLibs/${CMAKE_ANDROID_ARCH_ABI}/liba.so)
-
-target_link_libraries(${CMAKE_PROJECT_NAME} lib_bar)

@@ -13,7 +13,7 @@
 #include <mutex>
 #include <optional>
 
-#include <android/log.h>
+#include "log.h"
 
 namespace facebook::react {
 
@@ -23,7 +23,7 @@ class AsyncPromise2 {
   AsyncPromise2(jsi::Runtime& rt, const std::shared_ptr<CallInvoker>& jsInvoker)
       : state_(std::make_shared<SharedState>()) {
 
-    __android_log_write(ANDROID_LOG_ERROR, "AsyncPromise", "Constructor AsyncPromise");
+    TURBOLND_LOG_DEBUG("Constructor AsyncPromise");
     auto constructor = rt.global().getPropertyAsFunction(rt, "Promise");
 
     auto promise = constructor.callAsConstructor(
@@ -46,18 +46,18 @@ class AsyncPromise2 {
   }
 
   void resolve(T value) {
-    __android_log_write(ANDROID_LOG_ERROR, "AsyncPromise", "resolving promise");
+    TURBOLND_LOG_DEBUG("resolving promise");
     std::lock_guard<std::mutex> lock(state_->mutex);
-    __android_log_write(ANDROID_LOG_ERROR, "AsyncPromise", "after mutex lock");
+    TURBOLND_LOG_DEBUG("after mutex lock");
     if (state_->resolve) {
-      __android_log_write(ANDROID_LOG_ERROR, "AsyncPromise", "calling promise resolve");
+      TURBOLND_LOG_DEBUG("calling promise resolve");
       state_->resolve->call(std::move(value));
-      __android_log_write(ANDROID_LOG_ERROR, "AsyncPromise", "Clearing promise");
+      TURBOLND_LOG_DEBUG("Clearing promise");
       state_->resolve.reset();
       state_->reject.reset();
-      __android_log_write(ANDROID_LOG_ERROR, "AsyncPromise", "Cleared promise");
+      TURBOLND_LOG_DEBUG("Cleared promise");
     }
-    __android_log_write(ANDROID_LOG_ERROR, "AsyncPromise", "after if");
+    TURBOLND_LOG_DEBUG("after if");
   }
 
   void reject(Error error) {
@@ -88,9 +88,11 @@ class AsyncPromise2 {
 
   struct SharedState {
     ~SharedState() {
-      __android_log_write(ANDROID_LOG_ERROR, "AsyncPromise", "Destructor SharedState");
+      TURBOLND_LOG_DEBUG("Destructor SharedState");
       if (auto holder = promiseHolder.lock()) {
+        TURBOLND_LOG_DEBUG("promiseHolder release");
         holder->allowRelease();
+        TURBOLND_LOG_DEBUG("Released");
       }
     }
 
