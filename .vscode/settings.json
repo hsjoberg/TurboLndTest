@@ -69,6 +69,15 @@
     "thread": "cpp",
     "future": "cpp",
     "functional": "cpp",
-    "random": "cpp"
+    "random": "cpp",
+    "any": "cpp",
+    "codecvt": "cpp",
+    "csetjmp": "cpp",
+    "csignal": "cpp",
+    "forward_list": "cpp",
+    "source_location": "cpp",
+    "strstream": "cpp",
+    "typeindex": "cpp",
+    "valarray": "cpp"
   }
 }

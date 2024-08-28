@@ -11,6 +11,7 @@
     "gen-proto": "pbjs -t static-module -w es6 --force-long -o proto/lightning.js proto/*.proto proto/*/*.proto && pbts -o proto/lightning.d.ts proto/lightning.js"
   },
   "dependencies": {
+    "@dr.pogodin/react-native-fs": "^2.28.0",
     "base64-js": "^1.5.1",
     "protobufjs": "7.2.5",
     "protobufjs-cli": "1.1.2",

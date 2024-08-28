@@ -7,27 +7,15 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
   Alert,
   Button,
   Platform,
   SafeAreaView,
   ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
   useColorScheme,
   View,
 } from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
 import RNFS from 'react-native-fs';
 import { lnrpc } from './proto/lightning';
@@ -35,59 +23,15 @@ import * as base64 from "base64-js";
 
 import NativeSampleModuleCxx from './tm/NativeSampleModuleCxx';
 
-console.log("RNFS.DocumentDirectoryPath", RNFS.DocumentDirectoryPath);
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
+    <SafeAreaView>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
+        style={{height: '100%'}}>
+        <View>
           <Button
             onPress={async () => {
                 console.log(
@@ -142,7 +86,7 @@ function App(): React.JSX.Element {
             onPress={async () => {
               const startTime = performance.now();
               for (let i = 0; i < 100; i++) {
-                  await NativeSampleModuleCxx.getInfo("")
+                  await NativeSampleModuleCxx.listChannels("")
               }
               const endTime = performance.now();
               const executionTime = endTime - startTime;
@@ -198,9 +142,9 @@ function App(): React.JSX.Element {
           <Button
             onPress={async () => {
                 const unsubscribe = NativeSampleModuleCxx.subscribeState(
-                  (a) => {
-                    console.log("callback from subscribeState", a);
-                    const state = lnrpc.SubscribeStateResponse.decode(base64.toByteArray(a));
+                  (dataBase64) => {
+                    console.log("callback from subscribeState", dataBase64);
+                    const state = lnrpc.SubscribeStateResponse.decode(base64.toByteArray(dataBase64));
                     console.log("state", state);
                   },
                   (err) => {
@@ -210,7 +154,7 @@ function App(): React.JSX.Element {
 
                 // setTimeout(() => {
                 //   console.log("unsubscribe");
-                //   unsubscribe();
+                //     unsubscribe();
                 // }, 3000);
             }}
             title="subscribeState"
@@ -236,46 +180,43 @@ function App(): React.JSX.Element {
                     console.log("error from channelAcceptor", err);
                   }
                 );
+                setTimeout(() => {
+                  console.log("stopping chanAcceptor");
+                  chanAcceptor.stop();
+                }, 3000);
             }}
             title="channelAcceptor"
           />
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+
+
+          <Button
+            onPress={async () => {
+              const res = await NativeSampleModuleCxx.promiseLeakTest("");
+              // console.log("res", res);
+            }}
+            title="promiseLeakTest"
+          />
+          <Button
+            onPress={async () => {
+              const startTime = performance.now();
+              for (let i = 0; i < 100000; i++) {
+                await NativeSampleModuleCxx.promiseLeakTest("");
+              }
+              const endTime = performance.now();
+              const executionTime = endTime - startTime;
+
+              console.log("done");
+              console.log(`Execution time: ${executionTime} milliseconds`)
+              if (!__DEV__) {
+                Alert.alert(`Execution time: ${executionTime} milliseconds`);
+              }
+            }}
+            title="promiseLeakTest loop"
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;

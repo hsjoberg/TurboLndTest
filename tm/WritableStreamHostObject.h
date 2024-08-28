@@ -11,9 +11,10 @@ using namespace facebook;
 class WritableStreamHostObject : public jsi::HostObject {
 private:
     uintptr_t streamPtr;
+    uint8_t recvrStreamId;
 
 public:
-    WritableStreamHostObject(uintptr_t ptr) : streamPtr(ptr) {}
+    WritableStreamHostObject(uintptr_t ptr, uint64_t recvrStreamId) : streamPtr(ptr), recvrStreamId(recvrStreamId) {}
 
     jsi::Value send(jsi::Runtime& runtime, const jsi::Value& thisValue, const jsi::Value* arguments, size_t count) {
         if (count < 1 || !arguments[0].isString()) {
@@ -28,6 +29,10 @@ public:
     }
 
     jsi::Value stop(jsi::Runtime& runtime, const jsi::Value& thisValue, const jsi::Value* arguments, size_t count) {
+        // Lnd sends `rpc error: code = Unknown desc = EOF` when the stream is stopped
+        // But we'll remove the callback before, so the user won't get it
+        CallbackKeeper::getInstance().removeCallbacks(recvrStreamId);
+
         int stopResult = StopStreamC(streamPtr);
         return jsi::Value(stopResult == 0);
     }

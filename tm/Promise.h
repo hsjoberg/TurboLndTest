@@ -23,7 +23,7 @@ class AsyncPromise2 {
   AsyncPromise2(jsi::Runtime& rt, const std::shared_ptr<CallInvoker>& jsInvoker)
       : state_(std::make_shared<SharedState>()) {
 
-    TURBOLND_LOG_DEBUG("Constructor AsyncPromise");
+    //TURBOLND_LOG_DEBUG("Constructor AsyncPromise");
     auto constructor = rt.global().getPropertyAsFunction(rt, "Promise");
 
     auto promise = constructor.callAsConstructor(
@@ -46,18 +46,18 @@ class AsyncPromise2 {
   }
 
   void resolve(T value) {
-    TURBOLND_LOG_DEBUG("resolving promise");
+    //TURBOLND_LOG_DEBUG("resolving promise");
     std::lock_guard<std::mutex> lock(state_->mutex);
-    TURBOLND_LOG_DEBUG("after mutex lock");
+    //TURBOLND_LOG_DEBUG("after mutex lock");
     if (state_->resolve) {
-      TURBOLND_LOG_DEBUG("calling promise resolve");
+      //TURBOLND_LOG_DEBUG("calling promise resolve");
       state_->resolve->call(std::move(value));
-      TURBOLND_LOG_DEBUG("Clearing promise");
+      //TURBOLND_LOG_DEBUG("Clearing promise");
       state_->resolve.reset();
       state_->reject.reset();
-      TURBOLND_LOG_DEBUG("Cleared promise");
+      //TURBOLND_LOG_DEBUG("Cleared promise");
     }
-    TURBOLND_LOG_DEBUG("after if");
+    //TURBOLND_LOG_DEBUG("after if");
   }
 
   void reject(Error error) {
@@ -88,11 +88,11 @@ class AsyncPromise2 {
 
   struct SharedState {
     ~SharedState() {
-      TURBOLND_LOG_DEBUG("Destructor SharedState");
+      //TURBOLND_LOG_DEBUG("Destructor SharedState");
       if (auto holder = promiseHolder.lock()) {
-        TURBOLND_LOG_DEBUG("promiseHolder release");
+        //TURBOLND_LOG_DEBUG("promiseHolder release");
         holder->allowRelease();
-        TURBOLND_LOG_DEBUG("Released");
+        //TURBOLND_LOG_DEBUG("Released");
       }
     }
 
