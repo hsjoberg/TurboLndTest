@@ -1,4 +1,3 @@
-
 #include "NativeSampleModuleCxx.h"
 
 #include "liblnd.h"

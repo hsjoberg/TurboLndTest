@@ -1,6 +1,4 @@
-
-import type { TurboModule } from 'react-native/Libraries/TurboModule/RCTExport';
-import { TurboModuleRegistry } from 'react-native';
+import { TurboModule, TurboModuleRegistry } from "react-native";
 
 type ProtobufBase64 = string;
 interface WriteableStream {
@@ -12,30 +10,37 @@ type OnErrorCallback = (error: string) => void;
 type UnsubscribeFromStream = () => void;
 
 export interface Spec extends TurboModule {
-  start: (args: string) => Promise<string>;
-
   /**
-   * lncli: `walletbalance`
+   *
    * WalletBalance returns total unspent outputs(confirmed and unconfirmed), all
    * confirmed unspent outputs and all unconfirmed unspent outputs under control
    * of the wallet.
+   *
+   * @param [WalletBalanceRequest] base64-encoded
+   * @returns [WalletBalanceResponse] base64-encoded
    *
    */
   walletBalance(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `channelbalance`
+   *
    * ChannelBalance returns a report on the total funds across all open channels,
    * categorized in local/remote, pending local/remote and unsettled local/remote
    * balances.
+   *
+   * @param [ChannelBalanceRequest] base64-encoded
+   * @returns [ChannelBalanceResponse] base64-encoded
    *
    */
   channelBalance(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `listchaintxns`
+   *
    * GetTransactions returns a list describing all the known transactions
    * relevant to the wallet.
+   *
+   * @param [GetTransactionsRequest] base64-encoded
+   * @returns [TransactionDetails] base64-encoded
    *
    */
   getTransactions(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -46,16 +51,22 @@ export interface Spec extends TurboModule {
    * determine the fee (in sat/kw) to attach to a transaction in order to
    * achieve the confirmation target.
    *
+   * @param [EstimateFeeRequest] base64-encoded
+   * @returns [EstimateFeeResponse] base64-encoded
+   *
    */
   estimateFee(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `sendcoins`
+   *
    * SendCoins executes a request to send coins to a particular address. Unlike
    * SendMany, this RPC call only allows creating a single output at a time. If
    * neither target_conf, or sat_per_vbyte are set, then the internal wallet will
    * consult its fee model to determine a fee for the default confirmation
    * target.
+   *
+   * @param [SendCoinsRequest] base64-encoded
+   * @returns [SendCoinsResponse] base64-encoded
    *
    */
   sendCoins(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -67,6 +78,9 @@ export interface Spec extends TurboModule {
    * default, all utxos are listed. To list only the unconfirmed utxos, set
    * the unconfirmed_only to true.
    *
+   * @param [ListUnspentRequest] base64-encoded
+   * @returns [ListUnspentResponse] base64-encoded
+   *
    */
   listUnspent(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -76,22 +90,31 @@ export interface Spec extends TurboModule {
    * the client in which any newly discovered transactions relevant to the
    * wallet are sent over.
    *
+   * @param [GetTransactionsRequest] base64-encoded
+   * @returns [Transaction] base64-encoded
+   *
    */
   subscribeTransactions(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: `sendmany`
+   *
    * SendMany handles a request for a transaction that creates multiple specified
    * outputs in parallel. If neither target_conf, or sat_per_vbyte are set, then
    * the internal wallet will consult its fee model to determine a fee for the
    * default confirmation target.
    *
+   * @param [SendManyRequest] base64-encoded
+   * @returns [SendManyResponse] base64-encoded
+   *
    */
   sendMany(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `newaddress`
+   *
    * NewAddress creates a new address under control of the local wallet.
+   *
+   * @param [NewAddressRequest] base64-encoded
+   * @returns [NewAddressResponse] base64-encoded
    *
    */
   newAddress(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -104,6 +127,9 @@ export interface Spec extends TurboModule {
    * The main difference to SignMessage in the main RPC is that a specific key is
    * used to sign the message instead of the node identity private key.
    *
+   * @param [SignMessageRequest] base64-encoded
+   * @returns [SignMessageResponse] base64-encoded
+   *
    */
   signMessage(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -115,14 +141,20 @@ export interface Spec extends TurboModule {
    * The main difference to VerifyMessage in the main RPC is that the public key
    * used to sign the message does not have to be a node known to the network.
    *
+   * @param [VerifyMessageRequest] base64-encoded
+   * @returns [VerifyMessageResponse] base64-encoded
+   *
    */
   verifyMessage(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `connect`
+   *
    * ConnectPeer attempts to establish a connection to a remote peer. This is at
    * the networking level, and is used for communication between nodes. This is
    * distinct from establishing a channel with a peer.
+   *
+   * @param [ConnectPeerRequest] base64-encoded
+   * @returns [ConnectPeerResponse] base64-encoded
    *
    */
   connectPeer(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -133,12 +165,18 @@ export interface Spec extends TurboModule {
    * inbound nodes will be searched for the target node. An error message will
    * be returned if the peer was not found.
    *
+   * @param [DisconnectPeerRequest] base64-encoded
+   * @returns [DisconnectPeerResponse] base64-encoded
+   *
    */
   disconnectPeer(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `listpeers`
+   *
    * ListPeers returns a verbose listing of all currently active peers.
+   *
+   * @param [ListPeersRequest] base64-encoded
+   * @returns [ListPeersResponse] base64-encoded
    *
    */
   listPeers(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -149,41 +187,56 @@ export interface Spec extends TurboModule {
    * the client in which any events relevant to the state of peers are sent
    * over. Events include peers going online and offline.
    *
+   * @param [PeerEventSubscription] base64-encoded
+   * @returns [PeerEvent] base64-encoded
+   *
    */
   subscribePeerEvents(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: tower info
+   *
    * GetInfo returns general information concerning the companion watchtower
    * including its public key and URIs where the server is currently
    * listening for clients.
+   *
+   * @param [GetInfoRequest] base64-encoded
+   * @returns [GetInfoResponse] base64-encoded
    *
    */
   getInfo(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * * lncli: `getrecoveryinfo`
+   *
    * GetRecoveryInfo returns information concerning the recovery mode including
    * whether it's in a recovery mode, whether the recovery is finished, and the
    * progress made so far.
+   *
+   * @param [GetRecoveryInfoRequest] base64-encoded
+   * @returns [GetRecoveryInfoResponse] base64-encoded
    *
    */
   getRecoveryInfo(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `pendingchannels`
+   *
    * PendingChannels returns a list of all the channels that are currently
    * considered "pending". A channel is pending if it has finished the funding
    * workflow and is waiting for confirmations for the funding txn, or is in the
    * process of closure, either initiated cooperatively or non-cooperatively.
    *
+   * @param [PendingChannelsRequest] base64-encoded
+   * @returns [PendingChannelsResponse] base64-encoded
+   *
    */
   pendingChannels(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `listchannels`
+   *
    * ListChannels returns a description of all the open channels that this node
    * is a participant in.
+   *
+   * @param [ListChannelsRequest] base64-encoded
+   * @returns [ListChannelsResponse] base64-encoded
    *
    */
   listChannels(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -195,13 +248,19 @@ export interface Spec extends TurboModule {
    * sent over. Events include new active channels, inactive channels, and closed
    * channels.
    *
+   * @param [ChannelEventSubscription] base64-encoded
+   * @returns [ChannelEventUpdate] base64-encoded
+   *
    */
   subscribeChannelEvents(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: `closedchannels`
+   *
    * ClosedChannels returns a description of all the closed channels that
    * this node was a participant in.
+   *
+   * @param [ClosedChannelsRequest] base64-encoded
+   * @returns [ClosedChannelsResponse] base64-encoded
    *
    */
   closedChannels(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -213,11 +272,14 @@ export interface Spec extends TurboModule {
    * other sync calls, all byte slices are intended to be populated as hex
    * encoded strings.
    *
+   * @param [OpenChannelRequest] base64-encoded
+   * @returns [ChannelPoint] base64-encoded
+   *
    */
   openChannelSync(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `openchannel`
+   *
    * OpenChannel attempts to open a singly funded channel specified in the
    * request to a remote peer. Users are able to specify a target number of
    * blocks that the funding transaction should be confirmed in, or a manual fee
@@ -227,16 +289,22 @@ export interface Spec extends TurboModule {
    * arguments specified in the OpenChannelRequest, this pending channel ID can
    * then be used to manually progress the channel funding flow.
    *
+   * @param [OpenChannelRequest] base64-encoded
+   * @returns [OpenStatusUpdate] base64-encoded
+   *
    */
   openChannel(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: `batchopenchannel`
+   *
    * BatchOpenChannel attempts to open multiple single-funded channels in a
    * single transaction in an atomic way. This means either all channel open
    * requests succeed at once or all attempts are aborted if any of them fail.
    * This is the safer variant of using PSBTs to manually fund a batch of
    * channels through the OpenChannel RPC.
+   *
+   * @param [BatchOpenChannelRequest] base64-encoded
+   * @returns [BatchOpenChannelResponse] base64-encoded
    *
    */
   batchOpenChannel(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -252,6 +320,9 @@ export interface Spec extends TurboModule {
    * Alternatively, this can be used to interactively drive PSBT signing for
    * funding for partially complete funding transactions.
    *
+   * @param [FundingTransitionMsg] base64-encoded
+   * @returns [FundingStateStepResp] base64-encoded
+   *
    */
   fundingStateStep(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -263,11 +334,14 @@ export interface Spec extends TurboModule {
    * node operators to specify their own criteria for accepting inbound channels
    * through a single persistent connection.
    *
+   * @param [ChannelAcceptResponse] base64-encoded
+   * @returns [ChannelAcceptRequest] base64-encoded
+   *
    */
   channelAcceptor(onResponse: OnResponseCallback, onError: OnErrorCallback): WriteableStream;
 
   /**
-   * lncli: `closechannel`
+   *
    * CloseChannel attempts to close an active channel identified by its channel
    * outpoint (ChannelPoint). The actions of this method can additionally be
    * augmented to attempt a force close after a timeout period in the case of an
@@ -276,17 +350,23 @@ export interface Spec extends TurboModule {
    * closure transaction is confirmed, or a manual fee rate. If neither are
    * specified, then a default lax, block confirmation target is used.
    *
+   * @param [CloseChannelRequest] base64-encoded
+   * @returns [CloseStatusUpdate] base64-encoded
+   *
    */
   closeChannel(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: `abandonchannel`
+   *
    * AbandonChannel removes all channel state from the database except for a
    * close summary. This method can be used to get rid of permanently unusable
    * channels due to bugs fixed in newer versions of lnd. This method can also be
    * used to remove externally funded channels where the funding transaction was
    * never broadcast. Only available for non-externally funded channels in dev
    * build.
+   *
+   * @param [AbandonChannelRequest] base64-encoded
+   * @returns [AbandonChannelResponse] base64-encoded
    *
    */
   abandonChannel(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -297,6 +377,9 @@ export interface Spec extends TurboModule {
    * described by the passed PaymentRequest to the final destination. The call
    * returns a stream of payment status updates.
    *
+   * @param [SendRequest] base64-encoded
+   * @returns [SendResponse] base64-encoded
+   *
    */
   sendPayment(onResponse: OnResponseCallback, onError: OnErrorCallback): WriteableStream;
 
@@ -306,6 +389,9 @@ export interface Spec extends TurboModule {
    * This RPC is intended to be consumed by clients of the REST proxy.
    * Additionally, this RPC expects the destination's public key and the payment
    * hash (if any) to be encoded as hex strings.
+   *
+   * @param [SendRequest] base64-encoded
+   * @returns [SendResponse] base64-encoded
    *
    */
   sendPaymentSync(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -318,6 +404,9 @@ export interface Spec extends TurboModule {
    * things like rebalancing, and atomic swaps. It differs from the newer
    * SendToRouteV2 in that it doesn't return the full HTLC information.
    *
+   * @param [SendToRouteRequest] base64-encoded
+   * @returns [SendResponse] base64-encoded
+   *
    */
   sendToRoute(onResponse: OnResponseCallback, onError: OnErrorCallback): WriteableStream;
 
@@ -326,20 +415,26 @@ export interface Spec extends TurboModule {
    * SendToRouteSync is a synchronous version of SendToRoute. It Will block
    * until the payment either fails or succeeds.
    *
+   * @param [SendToRouteRequest] base64-encoded
+   * @returns [SendResponse] base64-encoded
+   *
    */
   sendToRouteSync(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `addinvoice`
+   *
    * AddInvoice attempts to add a new invoice to the invoice database. Any
    * duplicated invoices are rejected, therefore all invoices *must* have a
    * unique payment preimage.
+   *
+   * @param [Invoice] base64-encoded
+   * @returns [AddInvoiceResponse] base64-encoded
    *
    */
   addInvoice(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `listinvoices`
+   *
    * ListInvoices returns a list of all the invoices currently stored within the
    * database. Any active debug invoices are ignored. It has full support for
    * paginated responses, allowing users to query for specific invoices through
@@ -348,14 +443,20 @@ export interface Spec extends TurboModule {
    * next request. By default, the first 100 invoices created will be returned.
    * Backwards pagination is also supported through the Reversed flag.
    *
+   * @param [ListInvoiceRequest] base64-encoded
+   * @returns [ListInvoiceResponse] base64-encoded
+   *
    */
   listInvoices(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `lookupinvoice`
+   *
    * LookupInvoice attempts to look up an invoice according to its payment hash.
    * The passed payment hash *must* be exactly 32 bytes, if not, an error is
    * returned.
+   *
+   * @param [PaymentHash] base64-encoded
+   * @returns [Invoice] base64-encoded
    *
    */
   lookupInvoice(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -372,21 +473,30 @@ export interface Spec extends TurboModule {
    * of these fields can be set. If no fields are set, then we'll only send out
    * the latest add/settle events.
    *
+   * @param [InvoiceSubscription] base64-encoded
+   * @returns [Invoice] base64-encoded
+   *
    */
   subscribeInvoices(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: `decodepayreq`
+   *
    * DecodePayReq takes an encoded payment request string and attempts to decode
    * it, returning a full description of the conditions encoded within the
    * payment request.
+   *
+   * @param [PayReqString] base64-encoded
+   * @returns [PayReq] base64-encoded
    *
    */
   decodePayReq(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `listpayments`
+   *
    * ListPayments returns a list of all outgoing payments.
+   *
+   * @param [ListPaymentsRequest] base64-encoded
+   * @returns [ListPaymentsResponse] base64-encoded
    *
    */
   listPayments(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -396,6 +506,9 @@ export interface Spec extends TurboModule {
    * DeletePayment deletes an outgoing payment from DB. Note that it will not
    * attempt to delete an In-Flight payment, since that would be unsafe.
    *
+   * @param [DeletePaymentRequest] base64-encoded
+   * @returns [DeletePaymentResponse] base64-encoded
+   *
    */
   deletePayment(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -404,11 +517,14 @@ export interface Spec extends TurboModule {
    * DeleteAllPayments deletes all outgoing payments from DB. Note that it will
    * not attempt to delete In-Flight payments, since that would be unsafe.
    *
+   * @param [DeleteAllPaymentsRequest] base64-encoded
+   * @returns [DeleteAllPaymentsResponse] base64-encoded
+   *
    */
   deleteAllPayments(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `describegraph`
+   *
    * DescribeGraph returns a description of the latest graph state from the
    * point of view of the node. The graph information is partitioned into two
    * components: all the nodes/vertexes, and all the edges that connect the
@@ -416,37 +532,49 @@ export interface Spec extends TurboModule {
    * the node directional specific routing policy which includes: the time lock
    * delta, fee information, etc.
    *
+   * @param [ChannelGraphRequest] base64-encoded
+   * @returns [ChannelGraph] base64-encoded
+   *
    */
   describeGraph(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `getnodemetrics`
+   *
    * GetNodeMetrics returns node metrics calculated from the graph. Currently
    * the only supported metric is betweenness centrality of individual nodes.
+   *
+   * @param [NodeMetricsRequest] base64-encoded
+   * @returns [NodeMetricsResponse] base64-encoded
    *
    */
   getNodeMetrics(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `getchaninfo`
+   *
    * GetChanInfo returns the latest authenticated network announcement for the
    * given channel identified by its channel ID: an 8-byte integer which
    * uniquely identifies the location of transaction's funding output within the
    * blockchain.
    *
+   * @param [ChanInfoRequest] base64-encoded
+   * @returns [ChannelEdge] base64-encoded
+   *
    */
   getChanInfo(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `getnodeinfo`
+   *
    * GetNodeInfo returns the latest advertised, aggregated, and authenticated
    * channel information for the specified node identified by its public key.
+   *
+   * @param [NodeInfoRequest] base64-encoded
+   * @returns [NodeInfo] base64-encoded
    *
    */
   getNodeInfo(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `queryroutes`
+   *
    * QueryRoutes attempts to query the daemon's Channel Router for a possible
    * route to a target destination capable of carrying a specific amount of
    * satoshis. The returned route contains the full details required to craft and
@@ -458,21 +586,30 @@ export interface Spec extends TurboModule {
    * to the URL. Unfortunately this map type doesn't appear in the REST API
    * documentation because of a bug in the grpc-gateway library.
    *
+   * @param [QueryRoutesRequest] base64-encoded
+   * @returns [QueryRoutesResponse] base64-encoded
+   *
    */
   queryRoutes(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `getnetworkinfo`
+   *
    * GetNetworkInfo returns some basic stats about the known channel graph from
    * the point of view of the node.
+   *
+   * @param [NetworkInfoRequest] base64-encoded
+   * @returns [NetworkInfo] base64-encoded
    *
    */
   getNetworkInfo(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `stop`
+   *
    * StopDaemon will send a shutdown request to the interrupt handler, triggering
    * a graceful shutdown of the daemon.
+   *
+   * @param [StopRequest] base64-encoded
+   * @returns [StopResponse] base64-encoded
    *
    */
   stopDaemon(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -486,37 +623,49 @@ export interface Spec extends TurboModule {
    * channels being advertised, updates in the routing policy for a directional
    * channel edge, and when channels are closed on-chain.
    *
+   * @param [GraphTopologySubscription] base64-encoded
+   * @returns [GraphTopologyUpdate] base64-encoded
+   *
    */
   subscribeChannelGraph(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: `debuglevel`
+   *
    * DebugLevel allows a caller to programmatically set the logging verbosity of
    * lnd. The logging can be targeted according to a coarse daemon-wide logging
    * level, or in a granular fashion to specify the logging for a target
    * sub-system.
    *
+   * @param [DebugLevelRequest] base64-encoded
+   * @returns [DebugLevelResponse] base64-encoded
+   *
    */
   debugLevel(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `feereport`
+   *
    * FeeReport allows the caller to obtain a report detailing the current fee
    * schedule enforced by the node globally for each channel.
+   *
+   * @param [FeeReportRequest] base64-encoded
+   * @returns [FeeReportResponse] base64-encoded
    *
    */
   feeReport(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `updatechanpolicy`
+   *
    * UpdateChannelPolicy allows the caller to update the fee schedule and
    * channel policies for all channels globally, or a particular channel.
+   *
+   * @param [PolicyUpdateRequest] base64-encoded
+   * @returns [PolicyUpdateResponse] base64-encoded
    *
    */
   updateChannelPolicy(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `fwdinghistory`
+   *
    * ForwardingHistory allows the caller to query the htlcswitch for a record of
    * all HTLCs forwarded within the target time range, and integer offset
    * within that time range, for a maximum number of events. If no maximum number
@@ -529,17 +678,23 @@ export interface Spec extends TurboModule {
    * the index offset of the last entry. The index offset can be provided to the
    * request to allow the caller to skip a series of records.
    *
+   * @param [ForwardingHistoryRequest] base64-encoded
+   * @returns [ForwardingHistoryResponse] base64-encoded
+   *
    */
   forwardingHistory(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `exportchanbackup`
+   *
    * ExportChannelBackup attempts to return an encrypted static channel backup
    * for the target channel identified by it channel point. The backup is
    * encrypted with a key generated from the aezeed seed of the user. The
    * returned backup can either be restored using the RestoreChannelBackup
    * method once lnd is running, or via the InitWallet and UnlockWallet methods
    * from the WalletUnlocker service.
+   *
+   * @param [ExportChannelBackupRequest] base64-encoded
+   * @returns [ChannelBackup] base64-encoded
    *
    */
   exportChannelBackup(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -552,6 +707,9 @@ export interface Spec extends TurboModule {
    * as well, which contains a single encrypted blob containing the backups of
    * each channel.
    *
+   * @param [ChanBackupExportRequest] base64-encoded
+   * @returns [ChanBackupSnapshot] base64-encoded
+   *
    */
   exportAllChannelBackups(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -561,15 +719,21 @@ export interface Spec extends TurboModule {
    * snapshot. This method will accept either a packed Single or a packed Multi.
    * Specifying both will result in an error.
    *
+   * @param [ChanBackupSnapshot] base64-encoded
+   * @returns [VerifyChanBackupResponse] base64-encoded
+   *
    */
   verifyChanBackup(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `restorechanbackup`
+   *
    * RestoreChannelBackups accepts a set of singular channel backups, or a
    * single encrypted multi-chan backup and attempts to recover any funds
    * remaining within the channel. If we are able to unpack the backup, then the
    * new channel will be shown under listchannels, as well as pending channels.
+   *
+   * @param [RestoreChanBackupRequest] base64-encoded
+   * @returns [RestoreBackupResponse] base64-encoded
    *
    */
   restoreChannelBackups(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -584,37 +748,52 @@ export interface Spec extends TurboModule {
    * ups, but the updated set of encrypted multi-chan backups with the closed
    * channel(s) removed.
    *
+   * @param [ChannelBackupSubscription] base64-encoded
+   * @returns [ChanBackupSnapshot] base64-encoded
+   *
    */
   subscribeChannelBackups(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: `bakemacaroon`
+   *
    * BakeMacaroon allows the creation of a new macaroon with custom read and
    * write permissions. No first-party caveats are added since this can be done
    * offline.
+   *
+   * @param [BakeMacaroonRequest] base64-encoded
+   * @returns [BakeMacaroonResponse] base64-encoded
    *
    */
   bakeMacaroon(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `listmacaroonids`
+   *
    * ListMacaroonIDs returns all root key IDs that are in use.
+   *
+   * @param [ListMacaroonIDsRequest] base64-encoded
+   * @returns [ListMacaroonIDsResponse] base64-encoded
    *
    */
   listMacaroonIDs(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `deletemacaroonid`
+   *
    * DeleteMacaroonID deletes the specified macaroon ID and invalidates all
    * macaroons derived from that ID.
+   *
+   * @param [DeleteMacaroonIDRequest] base64-encoded
+   * @returns [DeleteMacaroonIDResponse] base64-encoded
    *
    */
   deleteMacaroonID(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `listpermissions`
+   *
    * ListPermissions lists all RPC method URIs and their required macaroon
    * permissions to access them.
+   *
+   * @param [ListPermissionsRequest] base64-encoded
+   * @returns [ListPermissionsResponse] base64-encoded
    *
    */
   listPermissions(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -624,6 +803,9 @@ export interface Spec extends TurboModule {
    * CheckMacaroonPermissions checks whether a request follows the constraints
    * imposed on the macaroon and that the macaroon is authorized to follow the
    * provided permissions.
+   *
+   * @param [CheckMacPermRequest] base64-encoded
+   * @returns [CheckMacPermResponse] base64-encoded
    *
    */
   checkMacaroonPermissions(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -643,18 +825,24 @@ export interface Spec extends TurboModule {
    * allowed to modify any responses. As a security measure, _no_ middleware can
    * modify responses for requests made with _unencumbered_ macaroons!
    *
+   * @param [RPCMiddlewareResponse] base64-encoded
+   * @returns [RPCMiddlewareRequest] base64-encoded
+   *
    */
   registerRPCMiddleware(onResponse: OnResponseCallback, onError: OnErrorCallback): WriteableStream;
 
   /**
-   * lncli: `sendcustom`
+   *
    * SendCustomMessage sends a custom peer message.
+   *
+   * @param [SendCustomMessageRequest] base64-encoded
+   * @returns [SendCustomMessageResponse] base64-encoded
    *
    */
   sendCustomMessage(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `subscribecustom`
+   *
    * SubscribeCustomMessages subscribes to a stream of incoming custom peer
    * messages.
    *
@@ -662,23 +850,31 @@ export interface Spec extends TurboModule {
    * needs to be compiled with  the `dev` build tag, and the message type to
    * override should be specified in lnd's experimental protocol configuration.
    *
+   * @param [SubscribeCustomMessagesRequest] base64-encoded
+   * @returns [CustomMessage] base64-encoded
+   *
    */
   subscribeCustomMessages(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * lncli: `listaliases`
+   *
    * ListAliases returns the set of all aliases that have ever existed with
    * their confirmed SCID (if it exists) and/or the base SCID (in the case of
    * zero conf).
+   *
+   * @param [ListAliasesRequest] base64-encoded
+   * @returns [ListAliasesResponse] base64-encoded
    *
    */
   listAliases(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
-   * LookupHtlcResolution retrieves a final htlc resolution from the database.
-   * If the htlc has no final resolution yet, a NotFound grpc status code is
-   * returned.
+   * If the replace_response field is set to true, this field must contain the
+   * binary serialized gRPC message in the protobuf format.
+   *
+   * @param [LookupHtlcResolutionRequest] base64-encoded
+   * @returns [LookupHtlcResolutionResponse] base64-encoded
    *
    */
   lookupHtlcResolution(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -693,6 +889,9 @@ export interface Spec extends TurboModule {
    * Once the cipherseed is obtained and verified by the user, the InitWallet
    * method should be used to commit the newly generated seed, and create the
    * wallet.
+   *
+   * @param [GenSeedRequest] base64-encoded
+   * @returns [GenSeedResponse] base64-encoded
    *
    */
   genSeed(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -712,29 +911,68 @@ export interface Spec extends TurboModule {
    * seed, then present it to the user. Once it has been verified by the user,
    * the seed can be fed into this RPC in order to commit the new wallet.
    *
+   * @param [InitWalletRequest] base64-encoded
+   * @returns [InitWalletResponse] base64-encoded
+   *
    */
   initWallet(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `unlock`
+   *
    * UnlockWallet is used at startup of lnd to provide a password to unlock
    * the wallet database.
+   *
+   * @param [UnlockWalletRequest] base64-encoded
+   * @returns [UnlockWalletResponse] base64-encoded
    *
    */
   unlockWallet(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `changepassword`
-   * ChangePassword changes the password of the encrypted wallet. This will
-   * automatically unlock the wallet database if successful.
+   *
+   * The binary serialized admin macaroon that can be used to access the daemon
+   * after rotating the macaroon root key. If both the stateless_init and
+   * new_macaroon_root_key parameter were set to true, this is the ONLY copy of
+   * the macaroon that was created from the new root key and MUST be stored
+   * safely by the caller. Otherwise a copy of this macaroon is also persisted on
+   * disk by the daemon, together with other macaroon files.
+   *
+   * @param [ChangePasswordRequest] base64-encoded
+   * @returns [ChangePasswordResponse] base64-encoded
    *
    */
   changePassword(data: ProtobufBase64): Promise<ProtobufBase64>;
 
-
+  /**
+   *
+   * Comments in this file will be directly parsed into the API
+   * Documentation as descriptions of the associated method, message, or field.
+   * These descriptions should go right above the definition of the object, and
+   * can be in either block or // comment format.
+   *
+   * An RPC method can be matched to an lncli command by placing a line in the
+   * beginning of the description in exactly the following format:
+   * lncli: `methodname`
+   *
+   * Failure to specify the exact name of the command will cause documentation
+   * generation to fail.
+   *
+   * More information on how exactly the gRPC documentation is generated from
+   * this proto file can be found here:
+   * https://github.com/lightninglabs/lightning-api
+   *
+   * @param [SubscribeStateRequest] base64-encoded
+   * @returns [SubscribeStateResponse] base64-encoded
+   *
+   */
   subscribeState(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
-
+  /**
+   *
+   *
+   * @param [GetStateRequest] base64-encoded
+   * @returns [GetStateResponse] base64-encoded
+   */
   getState(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
@@ -743,6 +981,9 @@ export interface Spec extends TurboModule {
    * along with height and hash of the best block, and a list of connected
    * peers.
    *
+   * @param [StatusRequest] base64-encoded
+   * @returns [StatusResponse] base64-encoded
+   *
    */
   autopilotStatus(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -750,6 +991,9 @@ export interface Spec extends TurboModule {
    *
    * ModifyStatus is used to modify the status of the autopilot agent, like
    * enabling or disabling it.
+   *
+   * @param [ModifyStatusRequest] base64-encoded
+   * @returns [ModifyStatusResponse] base64-encoded
    *
    */
   autopilotModifyStatus(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -760,13 +1004,19 @@ export interface Spec extends TurboModule {
    * active combination of these heruristics, for the scores they would give to
    * the given nodes.
    *
+   * @param [QueryScoresRequest] base64-encoded
+   * @returns [QueryScoresResponse] base64-encoded
+   *
    */
   autopilotQueryScores(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
-   * SetScores attempts to set the scores used by the running autopilot agent,
-   * if the external scoring heuristic is enabled.
+   * A map from hex-encoded public keys to scores. Scores must be in the range
+   * [0.0, 1.0].
+   *
+   * @param [SetScoresRequest] base64-encoded
+   * @returns [SetScoresResponse] base64-encoded
    *
    */
   autopilotSetScores(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -783,6 +1033,9 @@ export interface Spec extends TurboModule {
    * a notification is sent once the output script confirms in the given
    * transaction.
    *
+   * @param [ConfRequest] base64-encoded
+   * @returns [ConfEvent] base64-encoded
+   *
    */
   chainNotifierRegisterConfirmationsNtfn(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
@@ -795,20 +1048,19 @@ export interface Spec extends TurboModule {
    * A client can specify whether the spend request should be for a particular
    * outpoint  or for an output script by specifying a zero outpoint.
    *
+   * @param [SpendRequest] base64-encoded
+   * @returns [SpendEvent] base64-encoded
+   *
    */
   chainNotifierRegisterSpendNtfn(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
    *
-   * RegisterBlockEpochNtfn is a synchronous response-streaming RPC that
-   * registers an intent for a client to be notified of blocks in the chain. The
-   * stream will return a hash and height tuple of a block for each new/stale
-   * block in the chain. It is the client's responsibility to determine whether
-   * the tuple returned is for a new or stale block in the chain.
+   * An event sent when the spending transaction of the request was
+   * reorged out of the chain.
    *
-   * A client can also request a historical backlog of blocks from a particular
-   * point. This allows clients to be idempotent by ensuring that they do not
-   * missing processing a single block within the chain.
+   * @param [BlockEpoch] base64-encoded
+   * @returns [BlockEpoch] base64-encoded
    *
    */
   chainNotifierRegisterBlockEpochNtfn(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
@@ -819,6 +1071,9 @@ export interface Spec extends TurboModule {
    * to notify the client of state transitions of the specified invoice.
    * Initially the current invoice state is always sent out.
    *
+   * @param [SubscribeSingleInvoiceRequest] base64-encoded
+   * @returns [Invoice] base64-encoded
+   *
    */
   invoicesSubscribeSingleInvoice(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
@@ -828,6 +1083,9 @@ export interface Spec extends TurboModule {
    * canceled, this call will succeed. If the invoice is already settled, it will
    * fail.
    *
+   * @param [CancelInvoiceMsg] base64-encoded
+   * @returns [CancelInvoiceResp] base64-encoded
+   *
    */
   invoicesCancelInvoice(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -835,6 +1093,9 @@ export interface Spec extends TurboModule {
    *
    * AddHoldInvoice creates a hold invoice. It ties the invoice to the hash
    * supplied in the request.
+   *
+   * @param [AddHoldInvoiceRequest] base64-encoded
+   * @returns [AddHoldInvoiceResp] base64-encoded
    *
    */
   invoicesAddHoldInvoice(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -844,13 +1105,21 @@ export interface Spec extends TurboModule {
    * SettleInvoice settles an accepted invoice. If the invoice is already
    * settled, this call will succeed.
    *
+   * @param [SettleInvoiceMsg] base64-encoded
+   * @returns [SettleInvoiceResp] base64-encoded
+   *
    */
   invoicesSettleInvoice(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
-   * LookupInvoiceV2 attempts to look up at invoice. An invoice can be refrenced
-   * using either its payment hash, payment address, or set ID.
+   * Indicates that when a look up is done using a payment_addr, then no HTLCs
+   * related to the payment_addr should be returned. This is useful when one
+   * wants to be able to obtain the set of associated setIDs with a given
+   * invoice, then look up the sub-invoices "projected" by that set ID.
+   *
+   * @param [LookupInvoiceMsg] base64-encoded
+   * @returns [Invoice] base64-encoded
    *
    */
   invoicesLookupInvoiceV2(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -861,12 +1130,18 @@ export interface Spec extends TurboModule {
    * along with height and hash of the best block, and a list of connected
    * peers.
    *
+   * @param [StatusRequest] base64-encoded
+   * @returns [StatusResponse] base64-encoded
+   *
    */
   neutrinoKitStatus(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
    * AddPeer adds a new peer that has already been connected to the server.
+   *
+   * @param [AddPeerRequest] base64-encoded
+   * @returns [AddPeerResponse] base64-encoded
    *
    */
   neutrinoKitAddPeer(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -877,12 +1152,18 @@ export interface Spec extends TurboModule {
    * inbound nodes will be searched for the target node. An error message will
    * be returned if the peer was not found.
    *
+   * @param [DisconnectPeerRequest] base64-encoded
+   * @returns [DisconnectPeerResponse] base64-encoded
+   *
    */
   neutrinoKitDisconnectPeer(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
    * IsBanned returns true if the peer is banned, otherwise false.
+   *
+   * @param [IsBannedRequest] base64-encoded
+   * @returns [IsBannedResponse] base64-encoded
    *
    */
   neutrinoKitIsBanned(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -891,6 +1172,9 @@ export interface Spec extends TurboModule {
    *
    * GetBlockHeader returns a block header with a particular block hash.
    *
+   * @param [GetBlockHeaderRequest] base64-encoded
+   * @returns [GetBlockHeaderResponse] base64-encoded
+   *
    */
   neutrinoKitGetBlockHeader(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -898,12 +1182,18 @@ export interface Spec extends TurboModule {
    *
    * GetBlock returns a block with a particular block hash.
    *
+   * @param [GetBlockRequest] base64-encoded
+   * @returns [GetBlockResponse] base64-encoded
+   *
    */
   neutrinoKitGetBlock(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
    * GetCFilter returns a compact filter from a block.
+   *
+   * @param [GetCFilterRequest] base64-encoded
+   * @returns [GetCFilterResponse] base64-encoded
    *
    */
   neutrinoKitGetCFilter(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -913,13 +1203,19 @@ export interface Spec extends TurboModule {
    * Deprecated, use chainrpc.GetBlockHash instead.
    * GetBlockHash returns the header hash of a block at a given height.
    *
+   * @param [GetBlockHashRequest] base64-encoded
+   * @returns [GetBlockHashResponse] base64-encoded
+   *
    */
   neutrinoKitGetBlockHash(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: peers updatenodeannouncement
-   * UpdateNodeAnnouncement allows the caller to update the node parameters
-   * and broadcasts a new version of the node announcement to its peers.
+   *
+   * SET_INVOICE_AMP identifies the features that should be advertised on
+   * AMP invoices generated by the daemon.
+   *
+   * @param [NodeAnnouncementUpdateRequest] base64-encoded
+   * @returns [NodeAnnouncementUpdateResponse] base64-encoded
    *
    */
   peersUpdateNodeAnnouncement(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -930,6 +1226,9 @@ export interface Spec extends TurboModule {
    * PaymentRequest to the final destination. The call returns a stream of
    * payment updates.
    *
+   * @param [SendPaymentRequest] base64-encoded
+   * @returns [Payment] base64-encoded
+   *
    */
   routerSendPaymentV2(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
@@ -937,6 +1236,9 @@ export interface Spec extends TurboModule {
    *
    * TrackPaymentV2 returns an update stream for the payment identified by the
    * payment hash.
+   *
+   * @param [TrackPaymentRequest] base64-encoded
+   * @returns [Payment] base64-encoded
    *
    */
   routerTrackPaymentV2(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
@@ -950,6 +1252,9 @@ export interface Spec extends TurboModule {
    * payment attempt make sure to subscribe to this method before initiating any
    * payments.
    *
+   * @param [TrackPaymentsRequest] base64-encoded
+   * @returns [Payment] base64-encoded
+   *
    */
   routerTrackPayments(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
@@ -957,6 +1262,9 @@ export interface Spec extends TurboModule {
    *
    * EstimateRouteFee allows callers to obtain a lower bound w.r.t how much it
    * may cost to send an HTLC to the target end destination.
+   *
+   * @param [RouteFeeRequest] base64-encoded
+   * @returns [RouteFeeResponse] base64-encoded
    *
    */
   routerEstimateRouteFee(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -969,6 +1277,9 @@ export interface Spec extends TurboModule {
    * things like rebalancing, and atomic swaps. It differs from the newer
    * SendToRouteV2 in that it doesn't return the full HTLC information.
    *
+   * @param [SendToRouteRequest] base64-encoded
+   * @returns [SendToRouteResponse] base64-encoded
+   *
    */
   routerSendToRoute(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -979,6 +1290,9 @@ export interface Spec extends TurboModule {
    * route manually. This can be used for things like rebalancing, and atomic
    * swaps.
    *
+   * @param [SendToRouteRequest] base64-encoded
+   * @returns [HTLCAttempt] base64-encoded
+   *
    */
   routerSendToRouteV2(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -987,6 +1301,9 @@ export interface Spec extends TurboModule {
    * ResetMissionControl clears all mission control state and starts with a clean
    * slate.
    *
+   * @param [ResetMissionControlRequest] base64-encoded
+   * @returns [ResetMissionControlResponse] base64-encoded
+   *
    */
   routerResetMissionControl(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -994,6 +1311,9 @@ export interface Spec extends TurboModule {
    *
    * QueryMissionControl exposes the internal mission control state to callers.
    * It is a development feature.
+   *
+   * @param [QueryMissionControlRequest] base64-encoded
+   * @returns [QueryMissionControlResponse] base64-encoded
    *
    */
   routerQueryMissionControl(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1005,12 +1325,18 @@ export interface Spec extends TurboModule {
    * recent than our existing values. These values will only be imported
    * in-memory, and will not be persisted across restarts.
    *
+   * @param [XImportMissionControlRequest] base64-encoded
+   * @returns [XImportMissionControlResponse] base64-encoded
+   *
    */
   routerXImportMissionControl(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
    * GetMissionControlConfig returns mission control's current config.
+   *
+   * @param [GetMissionControlConfigRequest] base64-encoded
+   * @returns [GetMissionControlConfigResponse] base64-encoded
    *
    */
   routerGetMissionControlConfig(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1019,6 +1345,9 @@ export interface Spec extends TurboModule {
    *
    * SetMissionControlConfig will set mission control's config, if the config
    * provided is valid.
+   *
+   * @param [SetMissionControlConfigRequest] base64-encoded
+   * @returns [SetMissionControlConfigResponse] base64-encoded
    *
    */
   routerSetMissionControlConfig(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1030,6 +1359,9 @@ export interface Spec extends TurboModule {
    * probability if no channel is available or if the amount violates min/max
    * HTLC constraints.
    *
+   * @param [QueryProbabilityRequest] base64-encoded
+   * @returns [QueryProbabilityResponse] base64-encoded
+   *
    */
   routerQueryProbability(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1039,6 +1371,9 @@ export interface Spec extends TurboModule {
    * keys. It retrieves the relevant channel policies from the graph in order to
    * calculate the correct fees and time locks.
    *
+   * @param [BuildRouteRequest] base64-encoded
+   * @returns [BuildRouteResponse] base64-encoded
+   *
    */
   routerBuildRoute(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1046,6 +1381,9 @@ export interface Spec extends TurboModule {
    *
    * SubscribeHtlcEvents creates a uni-directional stream from the server to
    * the client which delivers a stream of htlc events.
+   *
+   * @param [SubscribeHtlcEventsRequest] base64-encoded
+   * @returns [HtlcEvent] base64-encoded
    *
    */
   routerSubscribeHtlcEvents(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
@@ -1056,6 +1394,9 @@ export interface Spec extends TurboModule {
    * described by the passed PaymentRequest to the final destination. The call
    * returns a stream of payment status updates.
    *
+   * @param [SendPaymentRequest] base64-encoded
+   * @returns [PaymentStatus] base64-encoded
+   *
    */
   routerSendPayment(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
@@ -1064,26 +1405,33 @@ export interface Spec extends TurboModule {
    * Deprecated, use TrackPaymentV2. TrackPayment returns an update stream for
    * the payment identified by the payment hash.
    *
+   * @param [TrackPaymentRequest] base64-encoded
+   * @returns [PaymentStatus] base64-encoded
+   *
    */
   routerTrackPayment(onResponse: OnResponseCallback, onError: OnErrorCallback): UnsubscribeFromStream;
 
   /**
-   * *
+   *
    * HtlcInterceptor dispatches a bi-directional streaming RPC in which
    * Forwarded HTLC requests are sent to the client and the client responds with
    * a boolean that tells LND if this htlc should be intercepted.
    * In case of interception, the htlc can be either settled, cancelled or
    * resumed later by using the ResolveHoldForward endpoint.
    *
+   * @param [ForwardHtlcInterceptResponse] base64-encoded
+   * @returns [ForwardHtlcInterceptRequest] base64-encoded
+   *
    */
   routerHtlcInterceptor(onResponse: OnResponseCallback, onError: OnErrorCallback): WriteableStream;
 
   /**
    *
-   * UpdateChanStatus attempts to manually set the state of a channel
-   * (enabled, disabled, or auto). A manual "disable" request will cause the
-   * channel to stay disabled until a subsequent manual request of either
-   * "enable" or "auto".
+   * The key of this forwarded htlc. It defines the incoming channel id and
+   * the index in this channel.
+   *
+   * @param [UpdateChanStatusRequest] base64-encoded
+   * @returns [UpdateChanStatusResponse] base64-encoded
    *
    */
   routerUpdateChanStatus(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1098,6 +1446,9 @@ export interface Spec extends TurboModule {
    *
    * If we are  unable to sign using the specified keys, then an error will be
    * returned.
+   *
+   * @param [SignReq] base64-encoded
+   * @returns [SignResp] base64-encoded
    *
    */
   signerSignOutputRaw(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1115,6 +1466,9 @@ export interface Spec extends TurboModule {
    * in the TxOut field, the value in that same field, and finally the input
    * index.
    *
+   * @param [SignReq] base64-encoded
+   * @returns [InputScriptResp] base64-encoded
+   *
    */
   signerComputeInputScript(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1126,6 +1480,9 @@ export interface Spec extends TurboModule {
    * The main difference to SignMessage in the main RPC is that a specific key is
    * used to sign the message instead of the node identity private key.
    *
+   * @param [SignMessageReq] base64-encoded
+   * @returns [SignMessageResp] base64-encoded
+   *
    */
   signerSignMessage(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1136,6 +1493,9 @@ export interface Spec extends TurboModule {
    *
    * The main difference to VerifyMessage in the main RPC is that the public key
    * used to sign the message does not have to be a node known to the network.
+   *
+   * @param [VerifyMessageReq] base64-encoded
+   * @returns [VerifyMessageResp] base64-encoded
    *
    */
   signerVerifyMessage(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1150,6 +1510,9 @@ export interface Spec extends TurboModule {
    * P_shared = privKeyNode * ephemeralPubkey
    * The resulting shared public key is serialized in the compressed format and
    * hashed with sha256, resulting in the final key length of 256bit.
+   *
+   * @param [SharedKeyRequest] base64-encoded
+   * @returns [SharedKeyResponse] base64-encoded
    *
    */
   signerDeriveSharedKey(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1168,6 +1531,9 @@ export interface Spec extends TurboModule {
    * considered to be HIGHLY EXPERIMENTAL and subject to change in upcoming
    * releases. Backward compatibility is not guaranteed!
    *
+   * @param [MuSig2CombineKeysRequest] base64-encoded
+   * @returns [MuSig2CombineKeysResponse] base64-encoded
+   *
    */
   signerMuSig2CombineKeys(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1184,6 +1550,9 @@ export interface Spec extends TurboModule {
    * considered to be HIGHLY EXPERIMENTAL and subject to change in upcoming
    * releases. Backward compatibility is not guaranteed!
    *
+   * @param [MuSig2SessionRequest] base64-encoded
+   * @returns [MuSig2SessionResponse] base64-encoded
+   *
    */
   signerMuSig2CreateSession(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1196,6 +1565,9 @@ export interface Spec extends TurboModule {
    * NOTE: The MuSig2 BIP is not final yet and therefore this API must be
    * considered to be HIGHLY EXPERIMENTAL and subject to change in upcoming
    * releases. Backward compatibility is not guaranteed!
+   *
+   * @param [MuSig2RegisterNoncesRequest] base64-encoded
+   * @returns [MuSig2RegisterNoncesResponse] base64-encoded
    *
    */
   signerMuSig2RegisterNonces(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1213,6 +1585,9 @@ export interface Spec extends TurboModule {
    * considered to be HIGHLY EXPERIMENTAL and subject to change in upcoming
    * releases. Backward compatibility is not guaranteed!
    *
+   * @param [MuSig2SignRequest] base64-encoded
+   * @returns [MuSig2SignResponse] base64-encoded
+   *
    */
   signerMuSig2Sign(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1227,26 +1602,29 @@ export interface Spec extends TurboModule {
    * considered to be HIGHLY EXPERIMENTAL and subject to change in upcoming
    * releases. Backward compatibility is not guaranteed!
    *
+   * @param [MuSig2CombineSigRequest] base64-encoded
+   * @returns [MuSig2CombineSigResponse] base64-encoded
+   *
    */
   signerMuSig2CombineSig(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
-   * MuSig2Cleanup (experimental!) allows a caller to clean up a session early in
-   * cases where it's obvious that the signing session won't succeed and the
-   * resources can be released.
+   * The unique ID of the signing session that should be removed/cleaned up.
    *
-   * NOTE: The MuSig2 BIP is not final yet and therefore this API must be
-   * considered to be HIGHLY EXPERIMENTAL and subject to change in upcoming
-   * releases. Backward compatibility is not guaranteed!
+   * @param [MuSig2CleanupRequest] base64-encoded
+   * @returns [MuSig2CleanupResponse] base64-encoded
    *
    */
   signerMuSig2Cleanup(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: `version`
+   *
    * GetVersion returns the current version and build information of the running
    * daemon.
+   *
+   * @param [VersionRequest] base64-encoded
+   * @returns [Version] base64-encoded
    *
    */
   versionerGetVersion(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1257,6 +1635,9 @@ export interface Spec extends TurboModule {
    * number of confirmations between the specified minimum and maximum. By
    * default, all utxos are listed. To list only the unconfirmed utxos, set
    * the unconfirmed_only to true.
+   *
+   * @param [ListUnspentRequest] base64-encoded
+   * @returns [ListUnspentResponse] base64-encoded
    *
    */
   walletKitListUnspent(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1269,6 +1650,9 @@ export interface Spec extends TurboModule {
    * successive invocations of this RPC. Outputs can be unlocked before their
    * expiration through `ReleaseOutput`.
    *
+   * @param [LeaseOutputRequest] base64-encoded
+   * @returns [LeaseOutputResponse] base64-encoded
+   *
    */
   walletKitLeaseOutput(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1278,12 +1662,18 @@ export interface Spec extends TurboModule {
    * selection if it remains unspent. The ID should match the one used to
    * originally lock the output.
    *
+   * @param [ReleaseOutputRequest] base64-encoded
+   * @returns [ReleaseOutputResponse] base64-encoded
+   *
    */
   walletKitReleaseOutput(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
    * ListLeases lists all currently locked utxos.
+   *
+   * @param [ListLeasesRequest] base64-encoded
+   * @returns [ListLeasesResponse] base64-encoded
    *
    */
   walletKitListLeases(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1294,6 +1684,9 @@ export interface Spec extends TurboModule {
    * (account in BIP43) specified. This method should return the next external
    * child within this branch.
    *
+   * @param [KeyReq] base64-encoded
+   * @returns [KeyDescriptor] base64-encoded
+   *
    */
   walletKitDeriveNextKey(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1302,12 +1695,18 @@ export interface Spec extends TurboModule {
    * DeriveKey attempts to derive an arbitrary key specified by the passed
    * KeyLocator.
    *
+   * @param [KeyLocator] base64-encoded
+   * @returns [KeyDescriptor] base64-encoded
+   *
    */
   walletKitDeriveKey(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
    * NextAddr returns the next unused address within the wallet.
+   *
+   * @param [AddrRequest] base64-encoded
+   * @returns [AddrResponse] base64-encoded
    *
    */
   walletKitNextAddr(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1318,6 +1717,9 @@ export interface Spec extends TurboModule {
    * name and key scope filter can be provided to filter through all of the
    * wallet accounts and return only those matching.
    *
+   * @param [ListAccountsRequest] base64-encoded
+   * @returns [ListAccountsResponse] base64-encoded
+   *
    */
   walletKitListAccounts(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1327,6 +1729,9 @@ export interface Spec extends TurboModule {
    * in the wallet in order to fee bump anchor channels if necessary. The value
    * scales with the number of public anchor channels but is capped at a maximum.
    *
+   * @param [RequiredReserveRequest] base64-encoded
+   * @returns [RequiredReserveResponse] base64-encoded
+   *
    */
   walletKitRequiredReserve(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1335,6 +1740,9 @@ export interface Spec extends TurboModule {
    * ListAddresses retrieves all the addresses along with their balance. An
    * account name filter can be provided to filter through all of the
    * wallet accounts and return the addresses of only those matching.
+   *
+   * @param [ListAddressesRequest] base64-encoded
+   * @returns [ListAddressesResponse] base64-encoded
    *
    */
   walletKitListAddresses(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1353,6 +1761,9 @@ export interface Spec extends TurboModule {
    * signing for additional address types: P2WKH, NP2WKH, P2TR.
    * For P2TR addresses this represents a special case. ECDSA is used to create
    * a compact signature which makes the public key of the signature recoverable.
+   *
+   * @param [SignMessageWithAddrRequest] base64-encoded
+   * @returns [SignMessageWithAddrResponse] base64-encoded
    *
    */
   walletKitSignMessageWithAddr(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1378,6 +1789,9 @@ export interface Spec extends TurboModule {
    * ECDSA compact signature to compare the reovered public key to the internal
    * taproot key. The compact ECDSA signature format was used because there
    * are still no known compact signature schemes for schnorr signatures.
+   *
+   * @param [VerifyMessageWithAddrRequest] base64-encoded
+   * @returns [VerifyMessageWithAddrResponse] base64-encoded
    *
    */
   walletKitVerifyMessageWithAddr(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1408,6 +1822,9 @@ export interface Spec extends TurboModule {
    * detected by lnd if they happen after the import. Rescans to detect past
    * events will be supported later on.
    *
+   * @param [ImportAccountRequest] base64-encoded
+   * @returns [ImportAccountResponse] base64-encoded
+   *
    */
   walletKitImportAccount(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1422,6 +1839,9 @@ export interface Spec extends TurboModule {
    * NOTE: Events (deposits/spends) for a key will only be detected by lnd if
    * they happen after the import. Rescans to detect past events will be
    * supported later on.
+   *
+   * @param [ImportPublicKeyRequest] base64-encoded
+   * @returns [ImportPublicKeyResponse] base64-encoded
    *
    */
   walletKitImportPublicKey(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1440,6 +1860,9 @@ export interface Spec extends TurboModule {
    * NOTE: Taproot keys imported through this RPC currently _cannot_ be used for
    * funding PSBTs. Only tracking the balance and UTXOs is currently supported.
    *
+   * @param [ImportTapscriptRequest] base64-encoded
+   * @returns [ImportTapscriptResponse] base64-encoded
+   *
    */
   walletKitImportTapscript(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1450,6 +1873,9 @@ export interface Spec extends TurboModule {
    * attempt to re-broadcast the transaction on start up, until it enters the
    * chain.
    *
+   * @param [Transaction] base64-encoded
+   * @returns [PublishResponse] base64-encoded
+   *
    */
   walletKitPublishTransaction(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1459,6 +1885,9 @@ export interface Spec extends TurboModule {
    * allows the caller to create a transaction that sends to several outputs at
    * once. This is ideal when wanting to batch create a set of transactions.
    *
+   * @param [SendOutputsRequest] base64-encoded
+   * @returns [SendOutputsResponse] base64-encoded
+   *
    */
   walletKitSendOutputs(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1467,6 +1896,9 @@ export interface Spec extends TurboModule {
    * EstimateFee attempts to query the internal fee estimator of the wallet to
    * determine the fee (in sat/kw) to attach to a transaction in order to
    * achieve the confirmation target.
+   *
+   * @param [EstimateFeeRequest] base64-encoded
+   * @returns [EstimateFeeResponse] base64-encoded
    *
    */
   walletKitEstimateFee(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1481,6 +1913,9 @@ export interface Spec extends TurboModule {
    * NOTE: Some of the fields within PendingSweepsRequest are not guaranteed to
    * remain supported. This is an advanced API that depends on the internals of
    * the UtxoSweeper, so things may change.
+   *
+   * @param [PendingSweepsRequest] base64-encoded
+   * @returns [PendingSweepsResponse] base64-encoded
    *
    */
   walletKitPendingSweeps(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1513,6 +1948,9 @@ export interface Spec extends TurboModule {
    * fee preference being provided. For now, the responsibility of ensuring that
    * the new fee preference is sufficient is delegated to the user.
    *
+   * @param [BumpFeeRequest] base64-encoded
+   * @returns [BumpFeeResponse] base64-encoded
+   *
    */
   walletKitBumpFee(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1521,6 +1959,9 @@ export interface Spec extends TurboModule {
    * ListSweeps returns a list of the sweep transactions our node has produced.
    * Note that these sweeps may not be confirmed yet, as we record sweeps on
    * broadcast, not confirmation.
+   *
+   * @param [ListSweepsRequest] base64-encoded
+   * @returns [ListSweepsResponse] base64-encoded
    *
    */
   walletKitListSweeps(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1531,6 +1972,9 @@ export interface Spec extends TurboModule {
    * has a label the call will fail unless the overwrite bool is set. This will
    * overwrite the exiting transaction label. Labels must not be empty, and
    * cannot exceed 500 characters.
+   *
+   * @param [LabelTransactionRequest] base64-encoded
+   * @returns [LabelTransactionResponse] base64-encoded
    *
    */
   walletKitLabelTransaction(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1556,6 +2000,9 @@ export interface Spec extends TurboModule {
    * publishing the transaction) or to unlock/release the locked UTXOs in case of
    * an error on the caller's side.
    *
+   * @param [FundPsbtRequest] base64-encoded
+   * @returns [FundPsbtResponse] base64-encoded
+   *
    */
   walletKitFundPsbt(data: ProtobufBase64): Promise<ProtobufBase64>;
 
@@ -1573,31 +2020,31 @@ export interface Spec extends TurboModule {
    * input/output/fee value validation, PSBT finalization). Any input that is
    * incomplete will be skipped.
    *
+   * @param [SignPsbtRequest] base64-encoded
+   * @returns [SignPsbtResponse] base64-encoded
+   *
    */
   walletKitSignPsbt(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
-   * FinalizePsbt expects a partial transaction with all inputs and outputs fully
-   * declared and tries to sign all inputs that belong to the wallet. Lnd must be
-   * the last signer of the transaction. That means, if there are any unsigned
-   * non-witness inputs or inputs without UTXO information attached or inputs
-   * without witness data that do not belong to lnd's wallet, this method will
-   * fail. If no error is returned, the PSBT is ready to be extracted and the
-   * final TX within to be broadcast.
+   * The name of the account to finalize the PSBT with. If empty, the default
+   * wallet account is used.
    *
-   * NOTE: This method does NOT publish the transaction once finalized. It is the
-   * caller's responsibility to either publish the transaction on success or
-   * unlock/release any locked UTXOs in case of an error in this method.
+   * @param [FinalizePsbtRequest] base64-encoded
+   * @returns [FinalizePsbtResponse] base64-encoded
    *
    */
   walletKitFinalizePsbt(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
-   * lncli: tower info
+   *
    * GetInfo returns general information concerning the companion watchtower
    * including its public key and URIs where the server is currently
    * listening for clients.
+   *
+   * @param [GetInfoRequest] base64-encoded
+   * @returns [GetInfoResponse] base64-encoded
    *
    */
   watchtowerGetInfo(data: ProtobufBase64): Promise<ProtobufBase64>;
@@ -1609,29 +2056,53 @@ export interface Spec extends TurboModule {
    * any new addresses included will be considered when dialing it for
    * session negotiations and backups.
    *
+   * @param [AddTowerRequest] base64-encoded
+   * @returns [AddTowerResponse] base64-encoded
+   *
    */
   watchtowerClientAddTower(data: ProtobufBase64): Promise<ProtobufBase64>;
 
   /**
    *
-   * RemoveTower removes a watchtower from being considered for future session
-   * negotiations and from being used for any subsequent backups until it's added
-   * again. If an address is provided, then this RPC only serves as a way of
-   * removing the address from the watchtower instead.
+   * The fee rate, in satoshis per vbyte, that will be used by watchtowers for
+   * justice transactions in response to channel breaches.
+   *
+   * @param [RemoveTowerRequest] base64-encoded
+   * @returns [RemoveTowerResponse] base64-encoded
    *
    */
   watchtowerClientRemoveTower(data: ProtobufBase64): Promise<ProtobufBase64>;
 
-
+  /**
+   *
+   *
+   * @param [ListTowersRequest] base64-encoded
+   * @returns [ListTowersResponse] base64-encoded
+   */
   watchtowerClientListTowers(data: ProtobufBase64): Promise<ProtobufBase64>;
 
-
+  /**
+   *
+   *
+   * @param [GetTowerInfoRequest] base64-encoded
+   * @returns [Tower] base64-encoded
+   */
   watchtowerClientGetTowerInfo(data: ProtobufBase64): Promise<ProtobufBase64>;
 
-
+  /**
+   *
+   *
+   * @param [StatsRequest] base64-encoded
+   * @returns [StatsResponse] base64-encoded
+   */
   watchtowerClientStats(data: ProtobufBase64): Promise<ProtobufBase64>;
 
-
+  /**
+   *
+   *
+   * @param [PolicyRequest] base64-encoded
+   * @returns [PolicyResponse] base64-encoded
+   */
   watchtowerClientPolicy(data: ProtobufBase64): Promise<ProtobufBase64>;
 }
 

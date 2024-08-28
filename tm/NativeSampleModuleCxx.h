@@ -1,4 +1,3 @@
-
 #pragma once
 
 #if __has_include(<React-Codegen/AppSpecsJSI.h>) // CocoaPod headers on Apple

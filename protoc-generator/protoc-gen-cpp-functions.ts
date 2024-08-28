@@ -1,11 +1,36 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-net
 
-const protobuf = require('protobufjs');
-const fs = require('fs');
-const path = require('path');
+import { encode } from "https://deno.land/std/encoding/base64.ts";
+import * as path from "https://deno.land/std/path/mod.ts";
+import protobuf from "npm:protobufjs@7.4.0";
+
+interface ProtoFile {
+  name: string;
+  package: string;
+  messageType: any[];
+  enumType: any[];
+  service: Service[];
+  options: any;
+}
+
+interface Service {
+  name: string;
+  method: Method[];
+}
+
+interface Method {
+  name: string;
+  input_type: string;
+  output_type: string;
+  client_streaming: boolean;
+  server_streaming: boolean;
+  options: any;
+}
+
+const lowercaseFirst = (str: string): string => str.charAt(0).toLowerCase() + str.slice(1);
 
 async function loadProtoFiles() {
-  const protoDir = path.resolve(__dirname, 'protos');
+  const protoDir = path.resolve(Deno.cwd(), 'protos');
   const descriptorPath = path.resolve(protoDir, 'google', 'protobuf', 'descriptor.proto');
   const pluginPath = path.resolve(protoDir, 'plugin.proto');
 
@@ -15,76 +40,110 @@ async function loadProtoFiles() {
   return root;
 }
 
-const lowercaseFirst = (str) => str.charAt(0).toLowerCase() + str.slice(1);
-
-function extractComments(filePath) {
-  const content = fs.readFileSync("../proto/" + filePath, 'utf8');
-  const lines = content.split('\n');
-  const comments = {};
-  let currentComment = [];
+function extractComments(filePath: string): Record<string, string> {
+  const content = Deno.readTextFileSync(path.join("..", "proto", filePath));
+  const lines = content.split("\n");
+  const comments: Record<string, string> = {};
+  let currentComment: string[] = [];
   let isInComment = false;
-  let currentMethod = null;
+  let currentMethod: string | null = null;
 
-  lines.forEach((line) => {
+  lines.forEach((line, index) => {
     const trimmedLine = line.trim();
-    if (trimmedLine.startsWith('/*')) {
+    if (trimmedLine.startsWith("/*")) {
       isInComment = true;
-      currentComment.push(trimmedLine.slice(2).trim());
-    } else if (trimmedLine.endsWith('*/')) {
-      isInComment = false;
-      currentComment.push(trimmedLine.slice(0, -2).trim());
-    } else if (isInComment) {
-      currentComment.push(trimmedLine);
-    } else if (trimmedLine.startsWith('rpc ')) {
-      currentMethod = trimmedLine.split(' ')[1];
-      if (currentComment.length > 0) {
-        comments[currentMethod] = currentComment.join('\n');
-        currentComment = [];
-      }
-    } else {
       currentComment = [];
+    } else if (trimmedLine.endsWith("*/")) {
+      isInComment = false;
+      // Look ahead for the method name
+      for (let i = index + 1; i < lines.length; i++) {
+        const nextLine = lines[i].trim();
+        if (nextLine.startsWith("rpc ")) {
+          currentMethod = nextLine.split(" ")[1];
+          break;
+        }
+      }
+      if (currentMethod) {
+        comments[currentMethod] = currentComment.join("\n");
+      }
+    } else if (isInComment) {
+      // Remove leading '*' if present, but keep the space after it
+      const commentLine = trimmedLine.startsWith("*") ? " " + trimmedLine.slice(1) : trimmedLine;
+      currentComment.push(commentLine);
     }
   });
 
   return comments;
 }
 
-function generateCode(request) {
-  const cppResult = [];
-  const rnResult = [];
-  const cppHeaderResult = [];
+function formatComment(comment: string, method: Method): string {
+  const lines = comment.split("\n");
+  let formattedLines = ["   *"]; // Start with an empty line
+  let lastLineWasEmpty = true;
 
-  const comments = {};
-  request.proto_file.forEach((protoFile) => {
+  lines.forEach((line) => {
+    const trimmedLine = line.trim();
+    if (trimmedLine === "") {
+      if (!lastLineWasEmpty) {
+        formattedLines.push("   *");
+        lastLineWasEmpty = true;
+      }
+    } else {
+      formattedLines.push(`   * ${trimmedLine}`);
+      lastLineWasEmpty = false;
+    }
+  });
+
+  // Add input and output types
+  const inputType = method.input_type.split(".").pop();
+  const outputType = method.output_type.split(".").pop();
+  formattedLines.push("   *");
+  formattedLines.push(`   * @param [${inputType}] base64-encoded`);
+  formattedLines.push(`   * @returns [${outputType}] base64-encoded`);
+
+  // Add an empty line at the end if it doesn't already exist
+  if (!lastLineWasEmpty) {
+    formattedLines.push("   *");
+  }
+
+  return `/**\n${formattedLines.join("\n")}\n   */`;
+}
+
+function generateCode(request: any): { cppContent: string; cppHeaderContent: string; rnContent: string } {
+  const cppResult: string[] = [];
+  const rnResult: string[] = [];
+  const cppHeaderResult: string[] = [];
+
+  const comments: Record<string, string> = {};
+  request.proto_file.forEach((protoFile: ProtoFile) => {
     const filePath = protoFile.name;
     Object.assign(comments, extractComments(filePath));
   });
 
-  request.proto_file.forEach((protoFile) => {
+  request.proto_file.forEach((protoFile: ProtoFile) => {
     if (protoFile.service && Array.isArray(protoFile.service)) {
-      protoFile.service.forEach((service) => {
+      protoFile.service.forEach((service: Service) => {
         const serviceName = service.name;
 
         if (service.method && Array.isArray(service.method)) {
-          service.method.forEach((method) => {
-
+          service.method.forEach((method: Method) => {
             let methodName = method.name;
-            if (serviceName === 'Lightning' || serviceName === 'WalletUnlocker' || serviceName === 'State') {
+            if (serviceName === "Lightning" || serviceName === "WalletUnlocker" || serviceName === "State") {
               methodName = lowercaseFirst(methodName);
             } else {
               methodName = lowercaseFirst(serviceName + methodName);
             }
-            const inputType = method.input_type.split('.').pop();
-            const outputType = method.output_type.split('.').pop();
+            // const inputType = method.inputType.split(".").pop();
+            // const outputType = method.outputType.split(".").pop();
             const isServerStreaming = method.server_streaming;
             const isClientStreaming = method.client_streaming;
 
             // Get comment from extracted comments
             const comment = comments[method.name]
-              ? `/**\n   * ${comments[method.name].split('\n').join('\n   * ')}\n   */`
-              : '';
+            ? formatComment(comments[method.name], method)
+            : formatComment("", method);  // If no comment, still include input/output types
 
-
+            // Generate C++ and React Native code (implementation omitted for brevity)
             let cppMethodDeclaration;
             let cppMethodImplementation;
             let rnMethodSpec;
@@ -185,8 +244,9 @@ jsi::Object NativeSampleModuleCxx::${methodName}(jsi::Runtime &rt, AsyncCallback
     }
   });
 
-  const cppContent = `
-#include "NativeSampleModuleCxx.h"
+  // Combine results into final content strings
+  const cppContent =
+`#include "NativeSampleModuleCxx.h"
 
 #include "liblnd.h"
 
@@ -275,8 +335,8 @@ facebook::react::AsyncPromise2<std::string> NativeSampleModuleCxx::promiseLeakTe
 } // namespace facebook::react
 `;
 
-  const cppHeaderContent = `
-#pragma once
+  const cppHeaderContent =
+`#pragma once
 
 #if __has_include(<React-Codegen/AppSpecsJSI.h>) // CocoaPod headers on Apple
 #include <React-Codegen/AppSpecsJSI.h>
@@ -313,9 +373,8 @@ ${cppHeaderResult.join('\n\n')}
 } // namespace facebook::react
 `;
 
-  const rnContent = `
-import type { TurboModule } from 'react-native/Libraries/TurboModule/RCTExport';
-import { TurboModuleRegistry } from 'react-native';
+  const rnContent =
+`import { TurboModule, TurboModuleRegistry } from "react-native";
 
 type ProtobufBase64 = string;
 interface WriteableStream {
@@ -338,37 +397,37 @@ export default TurboModuleRegistry.getEnforcing<Spec>('NativeSampleModuleCxx');
 
 async function main() {
   try {
-    const inputBuffer = fs.readFileSync(0);
     const root = await loadProtoFiles();
-
     const PluginRequest = root.lookupType("google.protobuf.compiler.CodeGeneratorRequest");
     const PluginResponse = root.lookupType("google.protobuf.compiler.CodeGeneratorResponse");
 
-    const request = PluginRequest.decode(inputBuffer);
+    const inputBuffer = await Deno.readAll(Deno.stdin);
+    const uint8Array = new Uint8Array(inputBuffer);
+    const request = PluginRequest.decode(uint8Array);
     const { cppContent, cppHeaderContent, rnContent } = generateCode(request);
 
     const response = PluginResponse.create({
       file: [
         {
-          name: 'NativeSampleModuleCxx.cpp',
-          content: cppContent
+          name: "NativeSampleModuleCxx.cpp",
+          content: cppContent,
         },
         {
-          name: 'NativeSampleModuleCxx.h',
-          content: cppHeaderContent
+          name: "NativeSampleModuleCxx.h",
+          content: cppHeaderContent,
         },
         {
-          name: 'NativeSampleModuleSpec.ts',
-          content: rnContent
-        }
-      ]
+          name: "NativeSampleModuleSpec.ts",
+          content: rnContent,
+        },
+      ],
     });
 
     const responseBuffer = PluginResponse.encode(response).finish();
-    process.stdout.write(responseBuffer);
+    await Deno.writeAll(Deno.stdout, responseBuffer);
   } catch (error) {
     console.error("Error in plugin:", error.stack);
-    process.exit(1);
+    Deno.exit(1);
   }
 }
 
