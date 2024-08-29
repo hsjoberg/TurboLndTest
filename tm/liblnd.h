@@ -59,10 +59,14 @@ typedef void (*ErrorFunc)(void* context, const char* error);
 
 static inline void bridgeResponseFunc(ResponseFunc f, void* context, const char* data, int length) {
     if (f) f(context, data, length);
+
+    free(data);
 }
 
 static inline void bridgeErrorFunc(ErrorFunc f, void* context, const char* error) {
     if (f) f(context, error);
+
+    // free(data)
 }
 
 // Callback

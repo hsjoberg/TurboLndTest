@@ -3,8 +3,9 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 
 add_compile_options(
         -fexceptions
-        -frtti
-        -std=c++20)
+        -frtti)
+        #-std=c++20) # collides with C code
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 file(GLOB tm_SRC CONFIGURE_DEPENDS *.cpp)
 add_library(tm STATIC ${tm_SRC})
@@ -19,25 +20,29 @@ target_link_libraries(tm
         lnd
 )
 
+# lnd
+add_library(lib_lnd SHARED IMPORTED)
+set_property(TARGET lib_lnd PROPERTY IMPORTED_NO_SONAME 1)
+set_target_properties(lib_lnd PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../jniLibs/${CMAKE_ANDROID_ARCH_ABI}/liblnd.so)
+
+target_link_libraries(${CMAKE_PROJECT_NAME} lib_lnd)
 
 
-
-
-# target_include_directories(tm PUBLIC
-#   "${CMAKE_SOURCE_DIR}/../../../../../lnd"
+# libb64
+# set(LIBB64_PATH ${CMAKE_CURRENT_SOURCE_DIR}/libb64)
+# set(LIBB64_SOURCES
+#     ${LIBB64_PATH}/src/cencode.c
+#     ${LIBB64_PATH}/src/cdecode.c
 # )
-# #target_link_libraries(tm lnd)
-# add_library(lnd SHARED IMPORTED)
-# set_property(TARGET lnd PROPERTY IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../jniLibs/${CMAKE_ANDROID_ARCH_ABI}/liblnd.so)
+# target_sources(tm PRIVATE ${LIBB64_SOURCES})
+# target_include_directories(tm PUBLIC ${LIBB64_PATH}/include)
 
-
-add_library(lib_foo SHARED IMPORTED)
-set_property(TARGET lib_foo PROPERTY IMPORTED_NO_SONAME 1)
-set_target_properties(lib_foo PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/../jniLibs/${CMAKE_ANDROID_ARCH_ABI}/liblnd.so)
-# target_include_directories(tm PUBLIC
-#   "${CMAKE_SOURCE_DIR}/../../../../../lnd"
+# set(LIBB64_PATH ${CMAKE_CURRENT_SOURCE_DIR}/libb64)
+# include_directories(${LIBB64_PATH}/include)
+# add_library(lib_libb64
+#   STATIC
+#   ${LIBB64_PATH}/src/cencode.c
+#   ${LIBB64_PATH}/src/cdecode.c
 # )
-# include_directories(${CMAKE_SOURCE_DIR}/../../../../lnd/)
 
-
-target_link_libraries(${CMAKE_PROJECT_NAME} lib_foo)
+# target_link_libraries(${CMAKE_PROJECT_NAME} lib_libb64)

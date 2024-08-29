@@ -2,7 +2,7 @@
 
 #include <jsi/jsi.h>
 
-#include "base64.h"
+#include "base64.hpp"
 
 using namespace facebook;
 
@@ -22,9 +22,9 @@ public:
         }
 
         std::string base64Data = arguments[0].asString(runtime).utf8(runtime);
-        std::vector<uint8_t> decodedData = base64_decode(base64Data);
+        std::string decodedData = base64::from_base64(base64Data);
 
-        int sendResult = SendStreamC(streamPtr, reinterpret_cast<char*>(decodedData.data()), static_cast<int>(decodedData.size()));
+        int sendResult = SendStreamC(streamPtr, decodedData.data(), static_cast<int>(decodedData.size()));
         return jsi::Value(sendResult == 0);
     }
 

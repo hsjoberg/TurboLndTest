@@ -41,3 +41,20 @@ class MainApplication : Application(), ReactApplication {
     }
   }
 }
+
+object FilesDirModule {
+    private lateinit var application: Application
+
+    @JvmStatic
+    fun initialize(app: Application) {
+        application = app
+    }
+
+    @JvmStatic
+    fun getFilesDir(): String {
+        if (!::application.isInitialized) {
+            throw IllegalStateException("FilesDirModule has not been initialized")
+        }
+        return application.filesDir.absolutePath
+    }
+}
